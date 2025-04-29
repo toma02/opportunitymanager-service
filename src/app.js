@@ -1,0 +1,31 @@
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const opportunityRoutes = require('./routes/opportunityRoutes');
+const errorHandler = require('./middlewares/errorHandler');
+
+const allowedOrigins = [
+  'http://172.20.10.4:8081',
+  'http://192.168.1.9:8081',
+  'http://10.24.26.227:8081'
+];
+
+const app = express();
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+app.use(bodyParser.json());
+app.use('/opportunities', opportunityRoutes);
+app.use(errorHandler);
+
+module.exports = app;
