@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/opportunityController');
+const opportunityController = require('../controllers/opportunityController');
 
-router.get('/', userController.getAllOpportunities);
+router.get('/', opportunityController.getAllOpportunities);
+router.get('/:id', opportunityController.getOpportunityById); 
 
 module.exports = router;
