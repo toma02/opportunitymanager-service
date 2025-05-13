@@ -2,12 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const opportunityRoutes = require('./routes/opportunityRoutes');
+const keywordRoutes = require('./routes/keywordRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const allowedOrigins = [
   'http://172.20.10.4:8081',
   'http://192.168.1.9:8081',
-  'http://10.24.26.227:8081'
+  'http://10.24.26.227:8081',
+  'http://192.168.1.109:8081'
 ];
 
 const app = express();
@@ -26,6 +28,7 @@ app.use(cors({
 
 app.use(bodyParser.json());
 app.use('/opportunities', opportunityRoutes);
+app.use('/keywords', keywordRoutes);
 app.use(errorHandler);
 
 module.exports = app;
