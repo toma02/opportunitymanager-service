@@ -80,7 +80,7 @@ const create = async (eventData) => {
     title,
     description,
     image,
-    keywords,
+    keywords, // array of keyword IDs (brojevi)
     startDate,
     endDate,
     frequencyId,
@@ -96,47 +96,71 @@ const create = async (eventData) => {
     userId,
   } = eventData;
 
-  const sql = `
-    INSERT INTO VolunteerOpportunity (
-      opportunitytitle,
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Kreiraj event
+    const sql = `
+      INSERT INTO VolunteerOpportunity (
+        opportunitytitle,
+        description,
+        opportunitydate,
+        enddate,
+        frequencyid,
+        frequencyvolume,
+        location,
+        ridetothedestination,
+        minimumvolunteers,
+        maximumvolunteers,
+        duration,
+        equipmentrequired,
+        cansharetosocialmedia,
+        isprivateevent,
+        useridoforganisator
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      RETURNING opportunityid
+    `;
+
+    const values = [
+      title,
       description,
-      opportunitydate,
-      enddate,
-      frequencyid,
-      frequencyvolume,
+      startDate,
+      endDate,
+      frequencyId,
+      frequencyVolume,
       location,
-      ridetothedestination,
-      minimumvolunteers,
-      maximumvolunteers,
+      transport,
+      minVolunteers,
+      maxVolunteers,
       duration,
-      equipmentrequired,
-      cansharetosocialmedia,
-      isprivateevent,
-      useridoforganisator
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-    RETURNING *
-  `;
+      equipment,
+      shareToSocialMedia,
+      isPrivate,
+      userId,
+    ];
 
-  const values = [
-    title,
-    description,
-    startDate,
-    endDate,
-    frequencyId,
-    frequencyVolume,
-    location,
-    transport,
-    minVolunteers,
-    maxVolunteers,
-    duration,
-    equipment,
-    shareToSocialMedia,
-    isPrivate,
-    userId,
-  ];
+    const result = await client.query(sql, values);
+    const eventId = result.rows[0].opportunityid;
 
-  const result = await pool.query(sql, values);
-  return result.rows[0];
+    if (Array.isArray(keywords) && keywords.length > 0) {
+      const keywordSql = `
+        INSERT INTO eventkeyword (eventid, keywordid)
+        VALUES ($1, $2)
+      `;
+      for (const keywordId of keywords) {
+        await client.query(keywordSql, [eventId, keywordId]);
+      }
+    }
+
+    await client.query('COMMIT');
+    return { ...result.rows[0], eventid: eventId };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 };
 
 
