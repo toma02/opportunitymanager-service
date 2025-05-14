@@ -79,56 +79,60 @@ const create = async (eventData) => {
   const {
     title,
     description,
-    category,
     image,
-    dateFrom,
-    dateTo,
-    frequency,
+    keywords,
+    startDate,
+    endDate,
+    frequencyId,
+    frequencyVolume,
     location,
     transport,
     minVolunteers,
     maxVolunteers,
+    duration,
     equipment,
     shareToSocialMedia,
     isPrivate,
-    userId
+    userId,
   } = eventData;
 
   const sql = `
     INSERT INTO VolunteerOpportunity (
-      OpportunityTitle,
-      Description,
-      Category,
-      OpportunityDate,
-      EndDate,
-      Frequency,
-      Location,
-      RideToTheDestination,
-      MinimumVolunteers,
-      MaximumVolunteers,
-      EquipmentRequired,
-      CanShareToSocialMedia,
-      IsPrivateEvent,
-      UserIDOfOrganisator
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      opportunitytitle,
+      description,
+      opportunitydate,
+      enddate,
+      frequencyid,
+      frequencyvolume,
+      location,
+      ridetothedestination,
+      minimumvolunteers,
+      maximumvolunteers,
+      duration,
+      equipmentrequired,
+      cansharetosocialmedia,
+      isprivateevent,
+      useridoforganisator
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     RETURNING *
   `;
 
   const values = [
     title,
     description,
-    category,
-    dateFrom,
-    dateTo,
-    frequency,
+    startDate,
+    endDate,
+    frequencyId,
+    frequencyVolume,
     location,
     transport,
     minVolunteers,
     maxVolunteers,
+    duration,
     equipment,
     shareToSocialMedia,
     isPrivate,
-    userId
+    userId,
   ];
 
   const result = await pool.query(sql, values);
