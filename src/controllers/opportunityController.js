@@ -1,4 +1,3 @@
-const opportunityService = require('../services/opportunityService');
 const opportunityModel = require('../models/opportunityModel');
 
 exports.getAllOpportunities = async (req, res, next) => {
@@ -18,7 +17,8 @@ exports.getOpportunityById = async (req, res, next) => {
       return res.status(400).json({ error: "ID je obavezan parametar" });
     }
 
-    const opportunity = await opportunityModel.getById(id);
+    const currentUser = req.query.current_user;
+    const opportunity = await opportunityModel.getById(id, currentUser);
 
     if (!opportunity) {
       return res.status(404).json({ error: "Događaj nije pronađen" });
@@ -53,8 +53,6 @@ exports.postEvent = async (req, res, next) => {
       userId,
     } = req.body;
 
-    // console.log({title, startDate, location, userId});
-
     if (!title || !startDate || !location || !userId) {
       return res.status(400).json({ error: "Obavezna polja su naslov, datum, lokacija i organizator" });
     }
@@ -80,6 +78,40 @@ exports.postEvent = async (req, res, next) => {
     });
 
     res.status(201).json(newEvent);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.postAttendance = async (req, res, next) => {
+  try {
+    const eventId = req.params.id;
+    const { userId } = req.body;
+
+    if (!eventId || !userId) {
+      return res.status(400).json({ error: "Event ID i userId su obavezni." });
+    }
+
+    const result = await opportunityModel.addAttendance(eventId, userId);
+
+    res.status(201).json({ success: true, message: "Prijava uspješna", attendance: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteAttendance = async (req, res, next) => {
+  try {
+    const eventId = req.params.id;
+    const { userId } = req.body;
+
+    if (!eventId || !userId) {
+      return res.status(400).json({ error: "Event ID i userId su obavezni." });
+    }
+
+    await opportunityModel.removeAttendance(eventId, userId);
+
+    res.status(200).json({ success: true, message: "Odjava uspješna" });
   } catch (err) {
     next(err);
   }
