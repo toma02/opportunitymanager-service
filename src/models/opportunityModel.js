@@ -1,6 +1,7 @@
 const pool = require('../db');
 
-const getAll = async () => {
+const getAll = async (currentUser) => {
+  const currentUserSql = currentUser ? `WHERE vo.useridoforganisator != ${currentUser}` : '';
   const sql = `
   SELECT
     vo.OpportunityID AS id,
@@ -27,8 +28,8 @@ const getAll = async () => {
     WHERE a.OpportunityID = vo.OpportunityID AND a.Attended = true LIMIT 5) AS participants
     FROM VolunteerOpportunity vo
     JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
-    ORDER BY vo.OpportunityDate ASC;
-    ;
+    ${currentUserSql}
+    ORDER BY vo.OpportunityDate ASC
   `;
   const result = await pool.query(sql);
   return result.rows;
@@ -80,7 +81,7 @@ const create = async (eventData) => {
     title,
     description,
     image,
-    keywords, // array of keyword IDs (brojevi)
+    keywords,
     startDate,
     endDate,
     frequencyId,
@@ -100,7 +101,6 @@ const create = async (eventData) => {
   try {
     await client.query('BEGIN');
 
-    // 1. Kreiraj event
     const sql = `
       INSERT INTO VolunteerOpportunity (
         opportunitytitle,
