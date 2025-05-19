@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const bodyParser = require('body-parser');
 const opportunityRoutes = require('./routes/opportunityRoutes');
 const keywordRoutes = require('./routes/keywordRoutes');
@@ -29,6 +30,7 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use('/opportunities', opportunityRoutes);
 app.use('/keywords', keywordRoutes);
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use(errorHandler);
 
 module.exports = app;
