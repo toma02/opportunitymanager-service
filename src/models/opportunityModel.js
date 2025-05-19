@@ -90,7 +90,6 @@ const create = async (eventData) => {
   const {
     title,
     description,
-    image,
     keywords,
     startDate,
     endDate,
@@ -208,10 +207,24 @@ const removeAttendance = async (eventId, userId) => {
   await pool.query(deleteSql, [eventId, userId]);
 };
 
+const uploadOrUpdateEventImage = async (eventId, filename) => {
+  const fileext = filename.split('.').pop();
+  const sql = `
+    INSERT INTO eventimages (opportunityid, filename, fileext, uploaddatetime)
+    VALUES ($1, $2, $3, NOW())
+    ON CONFLICT (opportunityid)
+    DO UPDATE SET filename = EXCLUDED.filename, fileext = EXCLUDED.fileext, uploaddatetime = NOW()
+    RETURNING *;
+  `;
+  const result = await pool.query(sql, [eventId, filename, fileext]);
+  return result.rows[0];
+};
+
 module.exports = {
   getAll,
   getById,
   create,
   addAttendance,
-  removeAttendance
+  removeAttendance,
+  uploadOrUpdateEventImage
 };

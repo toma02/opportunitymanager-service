@@ -31,12 +31,12 @@ exports.getOpportunityById = async (req, res, next) => {
 };
 
 exports.postEvent = async (req, res, next) => {
-  // console.log(req.body);
   try {
+    const imagePath = req.file ? req.file.filename : null;
+
     const {
       title,
       description,
-      image,
       keywords,
       startDate,
       endDate,
@@ -60,7 +60,6 @@ exports.postEvent = async (req, res, next) => {
     const newEvent = await opportunityModel.create({
       title,
       description,
-      image,
       keywords,
       startDate,
       endDate,
@@ -77,11 +76,18 @@ exports.postEvent = async (req, res, next) => {
       userId,
     });
 
+    const eventId = newEvent.opportunityid;
+
+    if (req.file) {
+      await opportunityModel.uploadOrUpdateEventImage(eventId, req.file.filename);
+    }
+
     res.status(201).json(newEvent);
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.postAttendance = async (req, res, next) => {
   try {
