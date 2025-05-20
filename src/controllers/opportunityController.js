@@ -34,6 +34,8 @@ exports.postEvent = async (req, res, next) => {
   try {
     const imagePath = req.file ? req.file.filename : null;
 
+    // console.log(req.body);
+
     const {
       title,
       description,
@@ -43,6 +45,8 @@ exports.postEvent = async (req, res, next) => {
       frequencyId,
       frequencyVolume,
       location,
+      latitude,
+      longitude,
       transport,
       minVolunteers,
       maxVolunteers,
@@ -66,6 +70,8 @@ exports.postEvent = async (req, res, next) => {
       frequencyId,
       frequencyVolume,
       location,
+      latitude,
+      longitude,
       transport,
       minVolunteers,
       maxVolunteers,

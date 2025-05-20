@@ -87,6 +87,8 @@ const getById = async (eventId, userId) => {
 
 
 const create = async (eventData) => {
+  console.log(eventData);
+
   const {
     title,
     description,
@@ -96,6 +98,8 @@ const create = async (eventData) => {
     frequencyId,
     frequencyVolume,
     location,
+    latitude,
+    longitude,
     transport,
     minVolunteers,
     maxVolunteers,
@@ -103,7 +107,7 @@ const create = async (eventData) => {
     equipment,
     shareToSocialMedia,
     isPrivate,
-    userId,
+    userId
   } = eventData;
 
   const client = await pool.connect();
@@ -126,10 +130,18 @@ const create = async (eventData) => {
         equipmentrequired,
         cansharetosocialmedia,
         isprivateevent,
-        useridoforganisator
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        useridoforganisator,
+        latitude,
+        longitude
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING opportunityid
     `;
+
+    const parsedFrequencyVolume =
+      frequencyVolume === undefined || frequencyVolume === null || frequencyVolume === ''
+        ? null
+        : parseInt(frequencyVolume, 10);
+
 
     const values = [
       title,
@@ -137,7 +149,7 @@ const create = async (eventData) => {
       startDate,
       endDate,
       frequencyId,
-      frequencyVolume,
+      parsedFrequencyVolume,
       location,
       transport,
       minVolunteers,
@@ -147,6 +159,8 @@ const create = async (eventData) => {
       shareToSocialMedia,
       isPrivate,
       userId,
+      latitude,
+      longitude
     ];
 
     const result = await client.query(sql, values);
