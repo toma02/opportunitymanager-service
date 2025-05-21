@@ -4,6 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const opportunityRoutes = require('./routes/opportunityRoutes');
 const keywordRoutes = require('./routes/keywordRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const allowedOrigins = [
@@ -30,6 +31,7 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use('/opportunities', opportunityRoutes);
 app.use('/keywords', keywordRoutes);
+app.use('/attendance', attendanceRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use(errorHandler);
 

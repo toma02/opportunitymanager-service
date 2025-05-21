@@ -18,7 +18,5 @@ const upload = multer({ storage: storage });
 router.get('/', opportunityController.getAllOpportunities);
 router.get('/:id', opportunityController.getOpportunityById);
 router.post('/', upload.single('image'), opportunityController.postEvent);
-router.post('/:id/attendance', opportunityController.postAttendance);
-router.delete('/:id/attendance', opportunityController.deleteAttendance);
 
 module.exports = router;

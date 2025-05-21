@@ -10,6 +10,16 @@ exports.getAllOpportunities = async (req, res, next) => {
   }
 };
 
+exports.getAllOpportunitiesByUser = async (req, res, next) => {
+  try {
+    const currentUser = req.query.current_user;
+    const opportunities = await opportunityModel.getAll(currentUser);
+    res.json(opportunities);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getOpportunityById = async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -89,41 +99,6 @@ exports.postEvent = async (req, res, next) => {
     }
 
     res.status(201).json(newEvent);
-  } catch (err) {
-    next(err);
-  }
-};
-
-
-exports.postAttendance = async (req, res, next) => {
-  try {
-    const eventId = req.params.id;
-    const { userId } = req.body;
-
-    if (!eventId || !userId) {
-      return res.status(400).json({ error: "Event ID i userId su obavezni." });
-    }
-
-    const result = await opportunityModel.addAttendance(eventId, userId);
-
-    res.status(201).json({ success: true, message: "Prijava uspješna", attendance: result });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.deleteAttendance = async (req, res, next) => {
-  try {
-    const eventId = req.params.id;
-    const { userId } = req.body;
-
-    if (!eventId || !userId) {
-      return res.status(400).json({ error: "Event ID i userId su obavezni." });
-    }
-
-    await opportunityModel.removeAttendance(eventId, userId);
-
-    res.status(200).json({ success: true, message: "Odjava uspješna" });
   } catch (err) {
     next(err);
   }
