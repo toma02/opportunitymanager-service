@@ -142,6 +142,16 @@ const create = async (eventData) => {
         ? null
         : parseInt(frequencyVolume, 10);
 
+    const parsedMinVolunteers =
+      minVolunteers === undefined || minVolunteers === null || minVolunteers === ''
+        ? null
+        : parseInt(minVolunteers, 10);
+
+    const parsedMaxVolunteers =
+      maxVolunteers === undefined || maxVolunteers === null || maxVolunteers === ''
+        ? null
+        : parseInt(maxVolunteers, 10);
+
 
     const values = [
       title,
@@ -152,8 +162,8 @@ const create = async (eventData) => {
       parsedFrequencyVolume,
       location,
       transport,
-      minVolunteers,
-      maxVolunteers,
+      parsedMinVolunteers,
+      parsedMaxVolunteers,
       duration,
       equipment,
       shareToSocialMedia,

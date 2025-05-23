@@ -1,5 +1,26 @@
 const attendanceModel = require('../models/attendanceModel');
 
+exports.getUserEvents = async (req, res, next) => {
+   try {
+    const id = req.params.id;
+    if (!id) {
+      return res.status(400).json({ error: "ID je obavezan parametar" });
+    }
+
+    const opportunities = await attendanceModel.getAllForUser(id);
+
+    if (!opportunities) {
+      return res.status(404).json({ error: "Korisnik se nije prijavio ni ja jedan događaj!" });
+    }
+
+    // console.log(opportunities);
+
+    res.json(opportunities);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.postAttendance = async (req, res, next) => {
   try {
     const eventId = req.params.id;
