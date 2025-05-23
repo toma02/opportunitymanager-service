@@ -7,7 +7,6 @@ const socketIo = require('socket.io');
 const PORT = process.env.PORT || 8888;
 
 const server = http.createServer(app);
-
 const io = socketIo(server, { cors: { origin: '*' } });
 
 const pgClient = new Client({
@@ -20,10 +19,18 @@ const pgClient = new Client({
 pgClient.connect();
 
 pgClient.query('LISTEN event_channel');
+pgClient.query('LISTEN attendance_channel');
 
 pgClient.on('notification', (msg) => {
-  io.emit('event:changed', msg.payload);
-  console.log('Event change:', msg.payload);
+  if (msg.channel === 'event_channel') {
+    io.emit('event:changed', msg.payload);
+    // console.log('Event change:', msg.payload);
+  } else if (msg.channel === 'attendance_channel') {
+    io.emit('attendance:changed', msg.payload);
+    // console.log('Attendance change:', msg.payload);
+  } else {
+    console.log('Unknown channel:', msg.channel, msg.payload);
+  }
 });
 
 server.listen(PORT, () => {
