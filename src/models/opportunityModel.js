@@ -25,7 +25,13 @@ const getAll = async (currentUser) => {
     (SELECT json_agg(json_build_object('id', a.UserID, 'name', u2.UserName))
     FROM Attendance a
     JOIN "User" u2 ON a.UserID = u2.UserId
-    WHERE a.OpportunityID = vo.OpportunityID AND a.Attended = true LIMIT 5) AS participants
+    WHERE a.OpportunityID = vo.OpportunityID AND a.Attended = true LIMIT 5) AS participants,
+    minimumvolunteers,
+    maximumvolunteers,
+    ridetothedestination,
+    equipmentrequired,
+    latitude,
+    longitude
     FROM VolunteerOpportunity vo
     JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
     ${currentUserSql}
@@ -75,7 +81,13 @@ const getById = async (eventId, userId) => {
       WHERE att.OpportunityID = vo.OpportunityID 
         AND att.UserID = $2 
         AND att.Attended = true
-    ) AS "isUserAttending"
+    ) AS "isUserAttending",
+    minimumvolunteers,
+    maximumvolunteers,
+    ridetothedestination,
+    equipmentrequired,
+    latitude,
+    longitude
   FROM VolunteerOpportunity vo
   JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
   WHERE vo.OpportunityID = $1;
@@ -87,7 +99,7 @@ const getById = async (eventId, userId) => {
 
 
 const create = async (eventData) => {
-  console.log(eventData);
+  // console.log(eventData);
 
   const {
     title,
