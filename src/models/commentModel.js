@@ -15,6 +15,17 @@ const getAllById = async (eventId) => {
 };
 
 
+const addComment = async ({ opportunityid, userid, comment }) => {
+  const sql = `
+    INSERT INTO comments (opportunityid, userid, comment, createat, likecount)
+    VALUES ($1, $2, $3, NOW(), 0)
+    RETURNING *;
+  `;
+  const result = await pool.query(sql, [opportunityid, userid, comment]);
+  return result.rows[0];
+};
+
 module.exports = {
-  getAllById
+  getAllById,
+  addComment
 };

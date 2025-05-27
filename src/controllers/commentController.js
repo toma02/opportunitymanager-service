@@ -20,3 +20,17 @@ exports.getAllCommentsById = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.postNewComment = async (req, res, next) => {
+  try {
+    const { opportunityid, userid, comment } = req.body;
+    if (!opportunityid || !userid || !comment) {
+      return res.status(400).json({ error: "Sva polja su obavezna!" });
+    }
+
+    const newComment = await commentModel.addComment({ opportunityid, userid, comment });
+    res.status(201).json(newComment);
+  } catch (err) {
+    next(err);
+  }
+};

@@ -85,7 +85,15 @@ const getAll = async (currentUser) => {
               WHERE 
                 a.OpportunityID = vo.OpportunityID 
                 AND a.Attended = true
-            ) >= vo.maximumvolunteers AS isFull, 
+            ) >= vo.maximumvolunteers AS isFull,
+            (
+              SELECT 
+                COUNT(*) 
+              FROM 
+                comments c 
+              WHERE 
+                c.opportunityid = vo.OpportunityID
+            ) AS commentsCount,
             ridetothedestination, 
             equipmentrequired, 
             latitude, 
@@ -200,6 +208,14 @@ const getById = async (eventId, userId) => {
                 a.OpportunityID = vo.OpportunityID 
                 AND a.Attended = true
             ) >= vo.maximumvolunteers AS isFull, 
+            (
+              SELECT 
+                COUNT(*) 
+              FROM 
+                comments c 
+              WHERE 
+                c.opportunityid = vo.OpportunityID
+            ) AS commentsCount,
             ridetothedestination, 
             equipmentrequired, 
             latitude, 
