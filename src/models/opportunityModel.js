@@ -238,7 +238,6 @@ const create = async (eventData) => {
   const {
     title,
     description,
-    keywords,
     startDate,
     endDate,
     frequencyId,
@@ -255,6 +254,8 @@ const create = async (eventData) => {
     isPrivate,
     userId
   } = eventData;
+
+  let keywords = eventData.keywords;
 
   const client = await pool.connect();
   try {
@@ -321,6 +322,10 @@ const create = async (eventData) => {
 
     const result = await client.query(sql, values);
     const eventId = result.rows[0].opportunityid;
+
+    if (typeof keywords === 'string') {
+      keywords = JSON.parse(keywords);
+    }
 
     if (Array.isArray(keywords) && keywords.length > 0) {
       const keywordSql = `
