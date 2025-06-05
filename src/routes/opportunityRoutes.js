@@ -3,10 +3,11 @@ const router = express.Router();
 const opportunityController = require('../controllers/opportunityController');
 const multer = require('multer');
 const path = require('path');
+const authenticateToken = require('../utils/jwt');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, 'uploads/events');
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -17,6 +18,6 @@ const upload = multer({ storage: storage });
 
 router.get('/', opportunityController.getAllOpportunities);
 router.get('/:id', opportunityController.getOpportunityById);
-router.post('/', upload.single('image'), opportunityController.postEvent);
+router.post('/', authenticateToken, upload.single('image'), opportunityController.postEvent);
 
 module.exports = router;

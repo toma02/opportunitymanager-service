@@ -25,7 +25,7 @@ const getAll = async (currentUser) => {
               'name', 
               u.UserName, 
               'role', 
-              'Organizator volontiranja', 
+              u.role,
               'avatar', 
               'avatar_default' -- Potrebno zamijeniti
               ) AS organizer, 
@@ -129,7 +129,7 @@ const getById = async (eventId, userId) => {
               vo.OpportunityDate AS dateTime, 
               vo.Description AS description, 
               json_build_object(
-                'name', u.UserName, 'role', 'Organizator volontiranja', 
+                'name', u.UserName, 'role', u.role, 
                 'avatar', 'avatar_default'
               ) AS organizer, 
               (
