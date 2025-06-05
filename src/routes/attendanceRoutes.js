@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const attendanceController = require('../controllers/attendanceController');
+const authenticateToken = require('../utils/jwt');
 
 router.get('/:id/attendance', attendanceController.getUserEvents);
-router.post('/:id/attendance', attendanceController.postAttendance);
-router.delete('/:id/attendance', attendanceController.deleteAttendance);
+router.post('/:id/attendance', authenticateToken, attendanceController.postAttendance);
+router.delete('/:id/attendance', authenticateToken, attendanceController.deleteAttendance);
 
 module.exports = router;
