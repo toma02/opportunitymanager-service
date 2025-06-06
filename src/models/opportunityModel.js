@@ -1,7 +1,8 @@
 const pool = require('../db');
 
 const getAll = async (currentUser) => {
-  const currentUserSql = currentUser ? `WHERE vo.useridoforganisator != ${currentUser}` : '';
+  const whereSql = currentUser ? `WHERE vo.useridoforganisator != ${currentUser}` : ''; 
+
   const sql = `
             SELECT 
             vo.OpportunityID AS id, 
@@ -26,8 +27,8 @@ const getAll = async (currentUser) => {
               u.UserName, 
               'role', 
               u.role,
-              'avatar', 
-              'avatar_default' -- Potrebno zamijeniti
+              'avatar',
+              up.filename
               ) AS organizer, 
             (
               SELECT 
@@ -54,12 +55,13 @@ const getAll = async (currentUser) => {
               SELECT 
                 json_agg(
                   json_build_object(
-                    'id', a.UserID, 'name', u2.UserName
+                    'id', a.UserID, 'name', u2.UserName, 'avatar', up2.filename
                   )
                 ) 
               FROM 
                 Attendance a 
                 JOIN "User" u2 ON a.UserID = u2.UserId 
+                LEFT JOIN userprofile up2 ON u2.UserId = up2.userid
               WHERE 
                 a.OpportunityID = vo.OpportunityID 
                 AND a.Attended = true 
@@ -98,11 +100,11 @@ const getAll = async (currentUser) => {
             equipmentrequired, 
             latitude, 
             longitude 
-          FROM 
-            VolunteerOpportunity vo 
-            JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId ${currentUserSql} 
-          ORDER BY 
-            vo.OpportunityDate ASC
+           FROM VolunteerOpportunity vo
+          JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
+          LEFT JOIN userprofile up ON u.UserId = up.userid
+          ${whereSql}
+          ORDER BY vo.OpportunityDate ASC
 `;
   const result = await pool.query(sql);
   return result.rows;
@@ -130,7 +132,7 @@ const getById = async (eventId, userId) => {
               vo.Description AS description, 
               json_build_object(
                 'name', u.UserName, 'role', u.role, 
-                'avatar', 'avatar_default'
+                'avatar', up.filename
               ) AS organizer, 
               (
                 SELECT 
@@ -157,12 +159,13 @@ const getById = async (eventId, userId) => {
                 SELECT 
                   json_agg(
                     json_build_object(
-                      'id', a.UserID, 'name', u2.UserName
+                      'id', a.UserID, 'name', u2.UserName, 'avatar', up2.filename
                     )
                   ) 
                 FROM 
                   Attendance a 
-                  JOIN "User" u2 ON a.UserID = u2.UserId 
+                  JOIN "User" u2 ON a.UserID = u2.UserId
+                  LEFT JOIN userprofile up2 ON u2.UserId = up2.userid 
                 WHERE 
                   a.OpportunityID = vo.OpportunityID 
                   AND a.Attended = true
@@ -261,7 +264,8 @@ const getById = async (eventId, userId) => {
               ) AS relatedEvents 
             FROM 
               VolunteerOpportunity vo 
-              JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId 
+              JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
+              LEFT JOIN userprofile up ON u.UserId = up.userid
             WHERE 
               vo.OpportunityID = $1;
 `;
