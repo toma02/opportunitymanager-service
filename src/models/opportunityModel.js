@@ -1,7 +1,7 @@
 const pool = require('../db');
 
 const getAll = async (currentUser) => {
-  const whereSql = currentUser ? `WHERE vo.useridoforganisator != ${currentUser}` : ''; 
+  const whereSql = currentUser ? `WHERE vo.useridoforganisator != ${currentUser}` : '';
 
   const sql = `
             SELECT 
@@ -225,26 +225,17 @@ const getById = async (eventId, userId) => {
               longitude, 
               (
                 SELECT 
-                  json_agg(
-                    json_build_object(
-                      'id', 
-                      vo2.OpportunityID, 
-                      'title', 
-                      vo2.OpportunityTitle, 
-                      'location', 
-                      vo2.Location, 
-                      'dateTime', 
-                      vo2.OpportunityDate, 
-                      'image', 
-                      (
-                        SELECT 
-                          FileName 
-                        FROM 
-                          EventImages 
-                        WHERE 
-                          OpportunityID = vo2.OpportunityID 
-                        LIMIT 
-                          1
+                  jsonb_agg(
+                    DISTINCT jsonb_build_object( 
+                      'id', vo2.OpportunityID, 
+                      'title', vo2.OpportunityTitle, 
+                      'location', vo2.Location, 
+                      'dateTime', vo2.OpportunityDate, 
+                      'image', (
+                        SELECT FileName 
+                        FROM EventImages 
+                        WHERE OpportunityID = vo2.OpportunityID 
+                        LIMIT 1
                       )
                     )
                   ) 
@@ -253,17 +244,13 @@ const getById = async (eventId, userId) => {
                   JOIN EventKeyword ek2 ON vo2.OpportunityID = ek2.EventID 
                 WHERE 
                   ek2.KeywordID IN (
-                    SELECT 
-                      KeywordID 
-                    FROM 
-                      EventKeyword 
-                    WHERE 
-                      EventID = vo.OpportunityID
+                    SELECT DISTINCT KeywordID
+                    FROM EventKeyword 
+                    WHERE EventID = vo.OpportunityID
                   ) 
                   AND vo2.OpportunityID <> vo.OpportunityID 
-                LIMIT 
-                  4
-              ) AS relatedEvents 
+                LIMIT 4
+              ) AS relatedEvents  
             FROM 
               VolunteerOpportunity vo 
               JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
