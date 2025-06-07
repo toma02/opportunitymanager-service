@@ -30,7 +30,9 @@ const getAll = async (currentUser) => {
               'role', 
               u.role,
               'avatar',
-              up.filename
+              up.filename,
+              'recently_active', 
+              (NOW() - u.lastlogin <= interval '1 hour')
               ) AS organizer, 
             (
               SELECT 
@@ -42,17 +44,6 @@ const getAll = async (currentUser) => {
               LIMIT 
                 1
             ) AS image, 
-            (
-              SELECT 
-                json_agg(UserID) 
-              FROM 
-                Attendance 
-              WHERE 
-                OpportunityID = vo.OpportunityID 
-                AND Attended = true 
-              LIMIT 
-                5
-            ) AS avatars, 
             (
               SELECT 
                 json_agg(
@@ -134,7 +125,7 @@ const getById = async (eventId, userId) => {
               vo.Description AS description, 
               json_build_object(
                 'id', u.userid,'name', u.UserName, 'role', u.role, 
-                'avatar', up.filename
+                'avatar', up.filename, 'recently_active', (NOW() - u.lastlogin <= interval '1 hour')
               ) AS organizer, 
               (
                 SELECT 
@@ -145,18 +136,7 @@ const getById = async (eventId, userId) => {
                   OpportunityID = vo.OpportunityID 
                 LIMIT 
                   1
-              ) AS image, 
-              (
-                SELECT 
-                  json_agg(UserID) 
-                FROM 
-                  Attendance 
-                WHERE 
-                  OpportunityID = vo.OpportunityID 
-                  AND Attended = true 
-                LIMIT 
-                  5
-              ) AS avatars, 
+              ) AS image,
               (
                 SELECT 
                   json_agg(

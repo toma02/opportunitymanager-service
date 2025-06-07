@@ -6,7 +6,8 @@ const getAllById = async (eventId) => {
       c.*, 
       u.username, 
       up.filename AS avatar,
-      vo.useridoforganisator AS organizer_id
+      vo.useridoforganisator AS organizer_id,
+      (NOW() - u.lastlogin <= interval '1 hours') AS recently_active
     FROM comments c
     JOIN "User" u ON c.userid = u.userid
     LEFT JOIN userprofile up ON u.userid = up.userid
@@ -18,7 +19,6 @@ const getAllById = async (eventId) => {
   const result = await pool.query(sql, [eventId]);
   return result.rows;
 };
-
 
 const addComment = async ({ opportunityid, userid, comment }) => {
   const sql = `
