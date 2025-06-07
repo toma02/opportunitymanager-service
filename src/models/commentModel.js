@@ -4,9 +4,14 @@ const getAllById = async (eventId) => {
   const sql = `
     SELECT 
       c.*, 
-      u.username 
+      u.username, 
+      up.filename AS avatar,
+      vo.useridoforganisator AS organizer_id
     FROM comments c
     JOIN "User" u ON c.userid = u.userid
+    LEFT JOIN userprofile up ON u.userid = up.userid
+    JOIN VolunteerOpportunity vo ON c.opportunityid = vo.opportunityid
+    JOIN "User" uo ON vo.useridoforganisator = uo.userid
     WHERE c.opportunityid = $1
     ORDER BY c.createat ASC
   `;

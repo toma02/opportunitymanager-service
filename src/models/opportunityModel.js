@@ -236,12 +236,20 @@ const getById = async (eventId, userId) => {
                         FROM EventImages 
                         WHERE OpportunityID = vo2.OpportunityID 
                         LIMIT 1
+                      ),
+                      'organizer', jsonb_build_object(  -- Dodajemo organizatora
+                        'id', u3.userid,
+                        'name', u3.username,
+                        'role', u3.role,
+                        'avatar', up3.filename
                       )
                     )
                   ) 
                 FROM 
                   VolunteerOpportunity vo2 
                   JOIN EventKeyword ek2 ON vo2.OpportunityID = ek2.EventID 
+                  JOIN "User" u3 ON vo2.UserIDOfOrganisator = u3.UserId  -- Join za organizatora
+                  LEFT JOIN userprofile up3 ON u3.UserId = up3.userid    -- Join za avatar
                 WHERE 
                   ek2.KeywordID IN (
                     SELECT DISTINCT KeywordID
@@ -250,7 +258,8 @@ const getById = async (eventId, userId) => {
                   ) 
                   AND vo2.OpportunityID <> vo.OpportunityID 
                 LIMIT 4
-              ) AS relatedEvents  
+              ) AS relatedEvents
+  
             FROM 
               VolunteerOpportunity vo 
               JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
