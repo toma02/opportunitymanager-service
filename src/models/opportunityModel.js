@@ -23,6 +23,8 @@ const getAll = async (currentUser) => {
             vo.OpportunityDate AS dateTime, 
             vo.Description AS description, 
             json_build_object(
+              'id', 
+              u.userid,
               'name', 
               u.UserName, 
               'role', 
@@ -131,7 +133,7 @@ const getById = async (eventId, userId) => {
               vo.OpportunityDate AS dateTime, 
               vo.Description AS description, 
               json_build_object(
-                'name', u.UserName, 'role', u.role, 
+                'id', u.userid,'name', u.UserName, 'role', u.role, 
                 'avatar', up.filename
               ) AS organizer, 
               (
