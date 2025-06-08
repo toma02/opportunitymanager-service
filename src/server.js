@@ -20,14 +20,15 @@ pgClient.connect();
 
 pgClient.query('LISTEN event_channel');
 pgClient.query('LISTEN attendance_channel');
+pgClient.query('LISTEN comment_channel');
 
 pgClient.on('notification', (msg) => {
   if (msg.channel === 'event_channel') {
     io.emit('event:changed', msg.payload);
-    // console.log('Event change:', msg.payload);
   } else if (msg.channel === 'attendance_channel') {
     io.emit('attendance:changed', msg.payload);
-    // console.log('Attendance change:', msg.payload);
+  } else if (msg.channel === 'comment_channel') {
+    io.emit('comment:changed', msg.payload);
   } else {
     console.log('Unknown channel:', msg.channel, msg.payload);
   }

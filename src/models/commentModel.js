@@ -30,7 +30,18 @@ const addComment = async ({ opportunityid, userid, comment }) => {
   return result.rows[0];
 };
 
+const deleteComment = async (commentId) => {
+  const sql = `
+    DELETE FROM comments
+    WHERE commentid = $1
+    RETURNING *;
+  `;
+  const result = await pool.query(sql, [commentId]);
+  return result.rows[0];
+};
+
 module.exports = {
   getAllById,
-  addComment
+  addComment,
+  deleteComment
 };

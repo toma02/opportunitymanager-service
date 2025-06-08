@@ -34,3 +34,22 @@ exports.postNewComment = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    console.log(commentId);
+    if (!commentId) {
+      return res.status(400).json({ error: "ID komentara je obavezan!" });
+    }
+
+    const deletedComment = await commentModel.deleteComment(commentId);
+    if (!deletedComment) {
+      return res.status(404).json({ error: "Komentar nije pronađen!" });
+    }
+
+    res.json({ success: true, deletedComment });
+  } catch (err) {
+    next(err);
+  }
+};

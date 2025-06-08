@@ -5,6 +5,7 @@ const authenticateToken = require('../utils/jwt');
 
 router.get('/:id', commentController.getAllCommentsById);
 router.post('/', authenticateToken, commentController.postNewComment);
+router.delete('/:commentId', authenticateToken, commentController.deleteComment);
 // router.post('/', commentController.getAllComments);
 
 module.exports = router;
