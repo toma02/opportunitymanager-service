@@ -1,19 +1,19 @@
 const commentModel = require('../models/commentModel');
 
 exports.getAllCommentsById = async (req, res, next) => {
-   try {
+  try {
     const id = req.params.id;
+    const currentUser = req.query.current_user;
+
     if (!id) {
       return res.status(400).json({ error: "ID je obavezan parametar" });
     }
 
-    const comments = await commentModel.getAllById(id);
+    const comments = await commentModel.getAllById(id, currentUser);
 
     if (!comments) {
       return res.status(404).json({ error: "Nema komentara za taj događaj!" });
     }
-
-    // console.log(comments);
 
     res.json(comments);
   } catch (err) {
@@ -38,7 +38,6 @@ exports.postNewComment = async (req, res, next) => {
 exports.deleteComment = async (req, res, next) => {
   try {
     const { commentId } = req.params;
-    // console.log(commentId);
     if (!commentId) {
       return res.status(400).json({ error: "ID komentara je obavezan!" });
     }
@@ -49,6 +48,36 @@ exports.deleteComment = async (req, res, next) => {
     }
 
     res.json({ success: true, deletedComment });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.likeComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.userid;
+    if (!commentId || !userId) {
+      return res.status(400).json({ error: "ID komentara i korisnika su obavezni!" });
+    }
+
+    const result = await commentModel.likeComment(commentId, userId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.unlikeComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.userid;
+    if (!commentId || !userId) {
+      return res.status(400).json({ error: "ID komentara i korisnika su obavezni!" });
+    }
+
+    const result = await commentModel.unlikeComment(commentId, userId);
+    res.json(result);
   } catch (err) {
     next(err);
   }
