@@ -235,13 +235,6 @@ const getById = async (eventId, userId) => {
                           'name', u3.username,
                           'role', u3.role,
                           'avatar', up3.filename
-                        ),
-                        'isUserAttending', EXISTS(
-                          SELECT 1 
-                          FROM Attendance att 
-                          WHERE att.OpportunityID = vo2.OpportunityID 
-                            AND att.UserID = $2 
-                            AND att.Attended = true
                         )
                       )
                     )
@@ -249,12 +242,15 @@ const getById = async (eventId, userId) => {
                     VolunteerOpportunity vo2
                     JOIN "User" u3 ON vo2.UserIDOfOrganisator = u3.UserId
                     LEFT JOIN userprofile up3 ON u3.UserId = up3.userid
+                    JOIN Attendance att ON vo2.OpportunityID = att.OpportunityID
                   WHERE 
                     vo2.OpportunityID <> vo.OpportunityID
                     AND vo.OpportunityDate < (vo2.OpportunityDate + vo2.duration * interval '1 minute')
                     AND (vo.OpportunityDate + vo.duration * interval '1 minute') > vo2.OpportunityDate
+                    AND att.UserID = $2 
+                    AND att.Attended = true
                   LIMIT 4
-                ) AS overlapping_events
+                ) AS overlappingEvents
             FROM 
               VolunteerOpportunity vo 
               JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId

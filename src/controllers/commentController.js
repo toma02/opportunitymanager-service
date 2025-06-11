@@ -38,7 +38,7 @@ exports.postNewComment = async (req, res, next) => {
 exports.deleteComment = async (req, res, next) => {
   try {
     const { commentId } = req.params;
-    console.log(commentId);
+    // console.log(commentId);
     if (!commentId) {
       return res.status(400).json({ error: "ID komentara je obavezan!" });
     }
