@@ -65,6 +65,7 @@ exports.postEvent = async (req, res, next) => {
       shareToSocialMedia,
       isPrivate,
       userId,
+      is_approved
     } = req.body;
 
     if (!title || !startDate || !location || !userId) {
@@ -90,6 +91,7 @@ exports.postEvent = async (req, res, next) => {
       shareToSocialMedia,
       isPrivate,
       userId,
+      is_approved
     });
 
     const eventId = newEvent.opportunityid;
