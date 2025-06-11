@@ -119,3 +119,23 @@ exports.postEvent = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.approveOpportunity = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const approvedEvent = await opportunityModel.approve(id);
+
+    if (!approvedEvent) {
+      return res.status(404).json({ error: "Događaj nije pronađen" });
+    }
+
+    res.json({
+      success: true,
+      message: "Događaj odobren",
+      event: approvedEvent
+    });
+  } catch (err) {
+    next(err);
+  }
+};

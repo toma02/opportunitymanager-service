@@ -194,7 +194,7 @@ const getById = async (eventId, userId) => {
                         WHERE OpportunityID = vo2.OpportunityID 
                         LIMIT 1
                       ),
-                      'organizer', jsonb_build_object(  -- Dodajemo organizatora
+                      'organizer', jsonb_build_object(
                         'id', u3.userid,
                         'name', u3.username,
                         'role', u3.role,
@@ -205,8 +205,8 @@ const getById = async (eventId, userId) => {
                 FROM 
                   VolunteerOpportunity vo2 
                   JOIN EventKeyword ek2 ON vo2.OpportunityID = ek2.EventID 
-                  JOIN "User" u3 ON vo2.UserIDOfOrganisator = u3.UserId  -- Join za organizatora
-                  LEFT JOIN userprofile up3 ON u3.UserId = up3.userid    -- Join za avatar
+                  JOIN "User" u3 ON vo2.UserIDOfOrganisator = u3.UserId 
+                  LEFT JOIN userprofile up3 ON u3.UserId = up3.userid 
                 WHERE 
                   ek2.KeywordID IN (
                     SELECT DISTINCT KeywordID
@@ -215,8 +215,46 @@ const getById = async (eventId, userId) => {
                   ) 
                   AND vo2.OpportunityID <> vo.OpportunityID 
                 LIMIT 4
-              ) AS relatedEvents
-  
+              ) AS relatedEvents,
+               (
+                  SELECT 
+                    jsonb_agg(
+                      DISTINCT jsonb_build_object(
+                        'id', vo2.OpportunityID,
+                        'title', vo2.OpportunityTitle,
+                        'location', vo2.Location,
+                        'dateTime', vo2.OpportunityDate,
+                        'image', (
+                          SELECT FileName 
+                          FROM EventImages 
+                          WHERE OpportunityID = vo2.OpportunityID 
+                          LIMIT 1
+                        ),
+                        'organizer', jsonb_build_object(
+                          'id', u3.userid,
+                          'name', u3.username,
+                          'role', u3.role,
+                          'avatar', up3.filename
+                        ),
+                        'isUserAttending', EXISTS(
+                          SELECT 1 
+                          FROM Attendance att 
+                          WHERE att.OpportunityID = vo2.OpportunityID 
+                            AND att.UserID = $2 
+                            AND att.Attended = true
+                        )
+                      )
+                    )
+                  FROM 
+                    VolunteerOpportunity vo2
+                    JOIN "User" u3 ON vo2.UserIDOfOrganisator = u3.UserId
+                    LEFT JOIN userprofile up3 ON u3.UserId = up3.userid
+                  WHERE 
+                    vo2.OpportunityID <> vo.OpportunityID
+                    AND vo.OpportunityDate < (vo2.OpportunityDate + vo2.duration * interval '1 minute')
+                    AND (vo.OpportunityDate + vo.duration * interval '1 minute') > vo2.OpportunityDate
+                  LIMIT 4
+                ) AS overlapping_events
             FROM 
               VolunteerOpportunity vo 
               JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
@@ -360,11 +398,23 @@ const uploadOrUpdateEventImage = async (eventId, filename) => {
   return result.rows[0];
 };
 
+const approve = async (eventId) => {
+  const sql = `
+    UPDATE volunteeropportunity 
+    SET is_approved = TRUE 
+    WHERE opportunityid = $1 
+    RETURNING *`;
+
+  const result = await pool.query(sql, [eventId]);
+  return result.rows[0] || null;
+};
+
 module.exports = {
   getAll,
   getById,
   create,
   uploadOrUpdateEventImage,
   getApproved,
-  getPending
+  getPending,
+  approve
 };
