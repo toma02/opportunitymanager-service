@@ -10,6 +10,24 @@ exports.getAllOpportunities = async (req, res, next) => {
   }
 };
 
+exports.getApprovedOpportunities = async (req, res, next) => {
+  try {
+    const opportunities = await opportunityModel.getApproved();
+    res.json(opportunities);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getPendingOpportunities = async (req, res, next) => {
+  try {
+    const opportunities = await opportunityModel.getPending();
+    res.json(opportunities);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getAllOpportunitiesByUser = async (req, res, next) => {
   try {
     const currentUser = req.query.current_user;
@@ -42,10 +60,6 @@ exports.getOpportunityById = async (req, res, next) => {
 
 exports.postEvent = async (req, res, next) => {
   try {
-    const imagePath = req.file ? req.file.filename : null;
-
-    // console.log(req.body);
-
     const {
       title,
       description,

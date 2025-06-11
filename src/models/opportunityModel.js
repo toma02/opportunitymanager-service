@@ -1,106 +1,83 @@
 const pool = require('../db');
 
-const getAll = async (currentUser) => {
-  const whereSql = currentUser ? `WHERE vo.useridoforganisator != ${currentUser}` : '';
-
+const getOpportunities = async (filter = '') => {
+  const whereSql = filter ? `WHERE ${filter}` : '';
   const sql = `
-            SELECT 
-            vo.OpportunityID AS id, 
-            vo.OpportunityTitle AS title, 
-            vo.Location AS location, 
-            TO_CHAR(vo.OpportunityDate, 'HH24:MI') AS time, 
-            json_build_object(
-              'day', 
-              EXTRACT(
-                DAY 
-                FROM 
-                  vo.OpportunityDate
-              ), 
-              'month', 
-              TO_CHAR(vo.OpportunityDate, 'Mon')
-            ) AS date, 
-            vo.duration AS duration, 
-            vo.OpportunityDate AS dateTime, 
-            vo.Description AS description, 
-            json_build_object(
-              'id', 
-              u.userid,
-              'name', 
-              u.UserName, 
-              'role', 
-              u.role,
-              'avatar',
-              up.filename,
-              'recently_active', 
-              (NOW() - u.lastlogin <= interval '1 hour')
-              ) AS organizer, 
-            (
-              SELECT 
-                FileName 
-              FROM 
-                EventImages 
-              WHERE 
-                OpportunityID = vo.OpportunityID 
-              LIMIT 
-                1
-            ) AS image, 
-            (
-              SELECT 
-                json_agg(
-                  json_build_object(
-                    'id', a.UserID, 'name', u2.UserName, 'avatar', up2.filename
-                  )
-                ) 
-              FROM 
-                Attendance a 
-                JOIN "User" u2 ON a.UserID = u2.UserId 
-                LEFT JOIN userprofile up2 ON u2.UserId = up2.userid
-              WHERE 
-                a.OpportunityID = vo.OpportunityID 
-                AND a.Attended = true 
-              LIMIT 
-                5
-            ) AS participants, 
-            minimumvolunteers, 
-            maximumvolunteers, 
-            (
-              SELECT 
-                COUNT(*) 
-              FROM 
-                Attendance a 
-              WHERE 
-                a.OpportunityID = vo.OpportunityID 
-                AND a.Attended = true
-            ) AS attendeesCount, 
-            (
-              SELECT 
-                COUNT(*) 
-              FROM 
-                Attendance a 
-              WHERE 
-                a.OpportunityID = vo.OpportunityID 
-                AND a.Attended = true
-            ) >= vo.maximumvolunteers AS isFull,
-            (
-              SELECT 
-                COUNT(*) 
-              FROM 
-                comments c 
-              WHERE 
-                c.opportunityid = vo.OpportunityID
-            ) AS commentsCount,
-            ridetothedestination, 
-            equipmentrequired, 
-            latitude, 
-            longitude 
-           FROM VolunteerOpportunity vo
-          JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
-          LEFT JOIN userprofile up ON u.UserId = up.userid
-          ${whereSql}
-          ORDER BY vo.OpportunityDate ASC
-`;
+    SELECT 
+      vo.OpportunityID AS id, 
+      vo.OpportunityTitle AS title, 
+      vo.Location AS location, 
+      TO_CHAR(vo.OpportunityDate, 'HH24:MI') AS time, 
+      json_build_object(
+        'day', 
+        EXTRACT(DAY FROM vo.OpportunityDate), 
+        'month', 
+        TO_CHAR(vo.OpportunityDate, 'Mon')
+      ) AS date, 
+      vo.duration AS duration, 
+      vo.OpportunityDate AS dateTime, 
+      vo.Description AS description, 
+      json_build_object(
+        'id', u.userid,
+        'name', u.UserName, 
+        'role', u.role,
+        'avatar', up.filename,
+        'recently_active', (NOW() - u.lastlogin <= interval '1 hour')
+      ) AS organizer, 
+      (
+        SELECT FileName FROM EventImages WHERE OpportunityID = vo.OpportunityID LIMIT 1
+      ) AS image, 
+      (
+        SELECT json_agg(
+          json_build_object('id', a.UserID, 'name', u2.UserName, 'avatar', up2.filename)
+        ) 
+        FROM Attendance a 
+        JOIN "User" u2 ON a.UserID = u2.UserId 
+        LEFT JOIN userprofile up2 ON u2.UserId = up2.userid
+        WHERE a.OpportunityID = vo.OpportunityID AND a.Attended = true LIMIT 5
+      ) AS participants, 
+      minimumvolunteers, 
+      maximumvolunteers, 
+      (
+        SELECT COUNT(*) 
+        FROM Attendance a 
+        WHERE a.OpportunityID = vo.OpportunityID AND a.Attended = true
+      ) AS attendeesCount, 
+      (
+        SELECT COUNT(*) 
+        FROM Attendance a 
+        WHERE a.OpportunityID = vo.OpportunityID AND a.Attended = true
+      ) >= vo.maximumvolunteers AS isFull,
+      (
+        SELECT COUNT(*) 
+        FROM comments c 
+        WHERE c.opportunityid = vo.OpportunityID
+      ) AS commentsCount,
+      ridetothedestination, 
+      equipmentrequired, 
+      latitude, 
+      longitude 
+    FROM VolunteerOpportunity vo
+    JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
+    LEFT JOIN userprofile up ON u.UserId = up.userid
+    ${whereSql}
+    ORDER BY vo.OpportunityDate ASC
+  `;
   const result = await pool.query(sql);
   return result.rows;
+};
+
+const getAll = async (currentUser) => {
+  const filter = currentUser ? `vo.useridoforganisator != ${currentUser}` : '';
+  return getOpportunities(filter);
+};
+
+const getApproved = async () => {
+  return getOpportunities('is_approved = TRUE');
+};
+
+const getPending = async () => {
+  return getOpportunities('is_approved = FALSE');
 };
 
 const getById = async (eventId, userId) => {
@@ -252,7 +229,6 @@ const getById = async (eventId, userId) => {
   return result.rows[0] || null;
 };
 
-
 const create = async (eventData) => {
   // console.log(eventData);
 
@@ -388,5 +364,7 @@ module.exports = {
   getAll,
   getById,
   create,
-  uploadOrUpdateEventImage
+  uploadOrUpdateEventImage,
+  getApproved,
+  getPending
 };
