@@ -8,6 +8,6 @@ router.post('/', authenticateToken, commentController.postNewComment);
 router.delete('/:commentId', authenticateToken, commentController.deleteComment);
 router.post('/:commentId/like', authenticateToken, commentController.likeComment);
 router.post('/:commentId/unlike', authenticateToken, commentController.unlikeComment);
-// router.post('/', commentController.getAllComments);
+router.post('/:commentId/report', authenticateToken, commentController.reportComment);
 
 module.exports = router;

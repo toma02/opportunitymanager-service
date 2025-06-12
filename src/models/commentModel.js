@@ -11,7 +11,11 @@ const getAllById = async (eventId, userId) => {
       ${userId ? `EXISTS(
         SELECT 1 FROM commentlikes cl 
         WHERE cl.commentid = c.commentid AND cl.userid = $2
-      ) AS is_liked` : 'false AS is_liked'}
+      ) AS is_liked` : 'false AS is_liked'},
+      ${userId ? `EXISTS(
+        SELECT 1 FROM commentreports cr
+        WHERE cr.commentid = c.commentid AND cr.userid = $2
+      ) AS is_reported_by_user` : 'false AS is_reported_by_user'}
     FROM comments c
     JOIN "User" u ON c.userid = u.userid
     LEFT JOIN userprofile up ON u.userid = up.userid
@@ -72,10 +76,22 @@ const unlikeComment = async (commentId, userId) => {
   return { success: true };
 };
 
+const reportComment = async (commentId, userId, reason = '') => {
+  const sql = `
+    INSERT INTO commentreports (commentid, userid, reason)
+    VALUES ($1, $2, $3)
+    RETURNING *;
+  `;
+  const result = await pool.query(sql, [commentId, userId, reason]);
+  return result.rows[0];
+};
+
+
 module.exports = {
   getAllById,
   addComment,
   deleteComment,
   likeComment,
-  unlikeComment
+  unlikeComment,
+  reportComment
 };

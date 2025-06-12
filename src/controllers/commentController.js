@@ -82,3 +82,24 @@ exports.unlikeComment = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.reportComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.userid;
+    const { reason } = req.body;
+
+    if (!commentId || !userId) {
+      return res.status(400).json({ error: "ID komentara i korisnika su obavezni!" });
+    }
+
+    const result = await commentModel.reportComment(commentId, userId, reason);
+
+    res.json({ success: true, report: result });
+  } catch (err) {
+    if (err.code === '23505') { 
+      return res.status(400).json({ error: "Već ste prijavili ovaj komentar." });
+    }
+    next(err);
+  }
+};

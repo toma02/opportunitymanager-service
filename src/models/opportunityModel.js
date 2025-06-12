@@ -17,6 +17,7 @@ const getOpportunities = async (filter = '') => {
       vo.duration AS duration, 
       vo.OpportunityDate AS dateTime, 
       vo.Description AS description, 
+      NOT vo.isprivateevent AS is_public,
       json_build_object(
         'id', u.userid,
         'name', u.UserName, 
@@ -100,6 +101,7 @@ const getById = async (eventId, userId) => {
               vo.duration AS duration, 
               vo.OpportunityDate AS dateTime, 
               vo.Description AS description, 
+              NOT vo.isprivateevent AS is_public,
               json_build_object(
                 'id', u.userid,'name', u.UserName, 'role', u.role, 
                 'avatar', up.filename, 'recently_active', (NOW() - u.lastlogin <= interval '1 hour')
