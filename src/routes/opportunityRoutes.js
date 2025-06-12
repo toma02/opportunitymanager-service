@@ -21,6 +21,7 @@ router.get('/approved', opportunityController.getApprovedOpportunities);
 router.get('/pending', opportunityController.getPendingOpportunities);
 router.put('/pending/:id', authenticateToken, opportunityController.approveOpportunity);
 router.get('/:id', opportunityController.getOpportunityById);
+router.put('/:id', authenticateToken, opportunityController.updateOpportunity);
 router.post('/', authenticateToken, upload.single('image'), opportunityController.postEvent);
 
 module.exports = router;

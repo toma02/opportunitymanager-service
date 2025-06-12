@@ -383,6 +383,50 @@ const create = async (eventData) => {
   }
 };
 
+const update = async (id, eventData) => {
+  const {
+    title,
+    location,
+    description,
+    minimumvolunteers,
+    maximumvolunteers,
+    ridetothedestination,
+    equipmentrequired,
+    is_public
+  } = eventData;
+
+  const isprivateevent = is_public === undefined ? undefined : !is_public;
+
+  const sql = `
+    UPDATE volunteeropportunity
+    SET
+      opportunitytitle = COALESCE($1, opportunitytitle),
+      location = COALESCE($2, location),
+      description = COALESCE($3, description),
+      minimumvolunteers = COALESCE($4, minimumvolunteers),
+      maximumvolunteers = COALESCE($5, maximumvolunteers),
+      ridetothedestination = COALESCE($6, ridetothedestination),
+      equipmentrequired = COALESCE($7, equipmentrequired),
+      isprivateevent = COALESCE($8, isprivateevent)
+    WHERE opportunityid = $9
+    RETURNING *;
+  `;
+  const values = [
+    title,
+    location,
+    description,
+    minimumvolunteers,
+    maximumvolunteers,
+    ridetothedestination,
+    equipmentrequired,
+    isprivateevent,
+    id
+  ];
+
+  const result = await pool.query(sql, values);
+  return result.rows[0] || null;
+};
+
 const uploadOrUpdateEventImage = async (eventId, filename) => {
   const fileext = filename.split('.').pop();
   const sql = `
@@ -414,5 +458,6 @@ module.exports = {
   uploadOrUpdateEventImage,
   getApproved,
   getPending,
-  approve
+  approve,
+  update
 };

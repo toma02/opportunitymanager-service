@@ -120,6 +120,27 @@ exports.postEvent = async (req, res, next) => {
   }
 };
 
+exports.updateOpportunity = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const eventData = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID događaja je obavezan!" });
+    }
+
+    const updatedEvent = await opportunityModel.update(id, eventData);
+
+    if (!updatedEvent) {
+      return res.status(404).json({ error: "Događaj nije pronađen!" });
+    }
+
+    res.json({ success: true, event: updatedEvent });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.approveOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
