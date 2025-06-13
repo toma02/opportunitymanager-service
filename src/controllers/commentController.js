@@ -103,3 +103,12 @@ exports.reportComment = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getAllReportedComments = async (req, res, next) => {
+  try {
+    const reportedComments = await commentModel.getAllReportedComments();
+    res.json(reportedComments);
+  } catch (err) {
+    next(err);
+  }
+};

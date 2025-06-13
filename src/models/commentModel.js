@@ -86,6 +86,50 @@ const reportComment = async (commentId, userId, reason = '') => {
   return result.rows[0];
 };
 
+const getAllReportedComments = async () => {
+  const sql = `
+    SELECT 
+      c.*, 
+      u.username, 
+      up.filename AS avatar,
+      vo.useridoforganisator AS organizer_id,
+      (NOW() - u.lastlogin <= interval '1 hours') AS recently_active,
+      (
+        SELECT COUNT(*) 
+        FROM commentreports cr 
+        WHERE cr.commentid = c.commentid
+      ) AS report_count,
+      (
+        SELECT json_agg(
+          json_build_object(
+            'reportid', cr.reportid,
+            'userid', cr.userid,
+            'username', report_user.username,
+            'avatar', report_up.filename,
+            'reason', cr.reason,
+            'created_at', cr.created_at
+          )
+        )
+        FROM commentreports cr
+        JOIN "User" report_user ON cr.userid = report_user.userid
+        LEFT JOIN userprofile report_up ON report_user.userid = report_up.userid
+        WHERE cr.commentid = c.commentid
+      ) AS reports
+    FROM comments c
+    JOIN "User" u ON c.userid = u.userid
+    LEFT JOIN userprofile up ON u.userid = up.userid
+    JOIN VolunteerOpportunity vo ON c.opportunityid = vo.opportunityid
+    WHERE EXISTS (
+      SELECT 1 
+      FROM commentreports cr 
+      WHERE cr.commentid = c.commentid
+    )
+    ORDER BY report_count DESC, c.createat ASC
+  `;
+  const result = await pool.query(sql);
+  return result.rows;
+};
+
 
 module.exports = {
   getAllById,
@@ -93,5 +137,6 @@ module.exports = {
   deleteComment,
   likeComment,
   unlikeComment,
-  reportComment
+  reportComment,
+  getAllReportedComments
 };
