@@ -6,6 +6,14 @@ const getUpcoming = async () => {
   return getOpportunities(filter);
 };
 
+const getActiveNow = async () => {
+  const filter = `
+    vo.OpportunityDate <= NOW()
+    AND (vo.OpportunityDate + vo.duration * INTERVAL '1 minute') > NOW()
+  `;
+  return getOpportunities(filter);
+};
+
 const getOpportunities = async (filter = '') => {
   const whereSql = filter ? `WHERE ${filter}` : '';
   const sql = `
@@ -466,5 +474,6 @@ module.exports = {
   getPending,
   approve,
   update,
-  getUpcoming
+  getUpcoming,
+  getActiveNow
 };

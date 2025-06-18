@@ -169,3 +169,12 @@ exports.getUpcomingOpportunities = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getActiveOpportunities = async (req, res, next) => {
+  try {
+    const opportunities = await opportunityModel.getActiveNow();
+    res.json(opportunities);
+  } catch (err) {
+    next(err);
+  }
+};
