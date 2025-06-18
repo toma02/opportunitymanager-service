@@ -1,5 +1,11 @@
 const pool = require('../db');
 
+const getUpcoming = async () => {
+  const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+  const filter = `vo.OpportunityDate > '${today}'`;
+  return getOpportunities(filter);
+};
+
 const getOpportunities = async (filter = '') => {
   const whereSql = filter ? `WHERE ${filter}` : '';
   const sql = `
@@ -459,5 +465,6 @@ module.exports = {
   getApproved,
   getPending,
   approve,
-  update
+  update,
+  getUpcoming
 };

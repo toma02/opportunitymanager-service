@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get('/', opportunityController.getAllOpportunities);
+router.get('/upcoming', opportunityController.getUpcomingOpportunities);
 router.get('/approved', opportunityController.getApprovedOpportunities);
 router.get('/pending', opportunityController.getPendingOpportunities);
 router.put('/pending/:id', authenticateToken, opportunityController.approveOpportunity);

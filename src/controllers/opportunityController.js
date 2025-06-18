@@ -160,3 +160,12 @@ exports.approveOpportunity = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getUpcomingOpportunities = async (req, res, next) => {
+  try {
+    const opportunities = await opportunityModel.getUpcoming();
+    res.json(opportunities);
+  } catch (err) {
+    next(err);
+  }
+};

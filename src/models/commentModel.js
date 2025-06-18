@@ -92,6 +92,7 @@ const getAllReportedComments = async () => {
       c.*, 
       u.username, 
       up.filename AS avatar,
+      u.cancomment AS cancomment,
       vo.useridoforganisator AS organizer_id,
       (NOW() - u.lastlogin <= interval '1 hours') AS recently_active,
       (
@@ -129,7 +130,6 @@ const getAllReportedComments = async () => {
   const result = await pool.query(sql);
   return result.rows;
 };
-
 
 module.exports = {
   getAllById,
