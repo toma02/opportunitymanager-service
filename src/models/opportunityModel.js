@@ -76,7 +76,8 @@ const getOpportunities = async (filter = '') => {
       ridetothedestination, 
       equipmentrequired, 
       latitude, 
-      longitude 
+      longitude,
+      is_approved
     FROM VolunteerOpportunity vo
     JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
     LEFT JOIN userprofile up ON u.UserId = up.userid
@@ -200,7 +201,8 @@ const getById = async (eventId, userId) => {
               ridetothedestination, 
               equipmentrequired, 
               latitude, 
-              longitude, 
+              longitude,
+              is_approved, 
               (
                 SELECT 
                   jsonb_agg(
