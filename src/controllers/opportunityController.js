@@ -178,3 +178,12 @@ exports.getActiveOpportunities = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getPastOpportunities = async (req, res, next) => {
+  try {
+    const opportunities = await opportunityModel.getPast();
+    res.json(opportunities);
+  } catch (err) {
+    next(err);
+  }
+};

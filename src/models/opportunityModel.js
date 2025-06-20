@@ -14,6 +14,11 @@ const getActiveNow = async () => {
   return getOpportunities(filter);
 };
 
+const getPast = async () => {
+  const filter = `(vo.OpportunityDate + vo.duration * INTERVAL '1 minute') < NOW()`;
+  return getOpportunities(filter);
+};
+
 const getOpportunities = async (filter = '') => {
   const whereSql = filter ? `WHERE ${filter}` : '';
   const sql = `
@@ -468,12 +473,13 @@ const approve = async (eventId) => {
 module.exports = {
   getAll,
   getById,
-  create,
-  uploadOrUpdateEventImage,
+  getUpcoming,
+  getActiveNow,
   getApproved,
   getPending,
+  getPast,
+  create,
+  uploadOrUpdateEventImage,
   approve,
-  update,
-  getUpcoming,
-  getActiveNow
+  update
 };
