@@ -21,6 +21,7 @@ pgClient.connect();
 pgClient.query('LISTEN event_channel');
 pgClient.query('LISTEN attendance_channel');
 pgClient.query('LISTEN comment_channel');
+pgClient.query('LISTEN userfavorites_channel');
 
 pgClient.on('notification', (msg) => {
   if (msg.channel === 'event_channel') {
@@ -29,6 +30,8 @@ pgClient.on('notification', (msg) => {
     io.emit('attendance:changed', msg.payload);
   } else if (msg.channel === 'comment_channel') {
     io.emit('comment:changed', msg.payload);
+  } else if (msg.channel === 'userfavorites_channel') {
+    io.emit('favorite:changed', msg.payload);
   } else {
     console.log('Unknown channel:', msg.channel, msg.payload);
   }
