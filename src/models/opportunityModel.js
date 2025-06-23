@@ -19,8 +19,19 @@ const getPast = async () => {
   return getOpportunities(filter);
 };
 
-const getOpportunities = async (filter = '') => {
+const getOpportunities = async (currentUserId = null, filter = '') => {
   const whereSql = filter ? `WHERE ${filter}` : '';
+  const sqlParams = [];
+
+  let userFavoriteJoin = '';
+  let userFavoriteSelect = 'FALSE AS is_favorited';
+
+  if (currentUserId) {
+    userFavoriteJoin = `LEFT JOIN user_favorites uf ON vo.OpportunityID = uf.opportunityid AND uf.userid = $${sqlParams.length + 1}`;
+    userFavoriteSelect = 'CASE WHEN uf.userid IS NOT NULL THEN TRUE ELSE FALSE END AS is_favorited';
+    sqlParams.push(currentUserId);
+  }
+
   const sql = `
     SELECT 
       vo.OpportunityID AS id, 
@@ -77,21 +88,25 @@ const getOpportunities = async (filter = '') => {
       equipmentrequired, 
       latitude, 
       longitude,
-      is_approved
+      is_approved,
+      ${userFavoriteSelect}
     FROM VolunteerOpportunity vo
     JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
     LEFT JOIN userprofile up ON u.UserId = up.userid
+    ${userFavoriteJoin}
     ${whereSql}
     ORDER BY vo.OpportunityDate ASC
   `;
-  const result = await pool.query(sql);
+
+  const result = await pool.query(sql, sqlParams);
   return result.rows;
 };
 
 const getAll = async (currentUser) => {
   const filter = currentUser ? `vo.useridoforganisator != ${currentUser}` : '';
-  return getOpportunities(filter);
+  return getOpportunities(currentUser, filter);
 };
+
 
 const getApproved = async () => {
   return getOpportunities('is_approved = TRUE');
@@ -273,11 +288,13 @@ const getById = async (eventId, userId) => {
                     AND att.UserID = $2 
                     AND att.Attended = true
                   LIMIT 4
-                ) AS overlappingEvents
+                ) AS overlappingEvents,
+                  CASE WHEN uf.userid IS NOT NULL THEN TRUE ELSE FALSE END AS is_favorited
             FROM 
               VolunteerOpportunity vo 
               JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
               LEFT JOIN userprofile up ON u.UserId = up.userid
+              LEFT JOIN userfavorites uf ON vo.OpportunityID = uf.opportunityid AND uf.userid = $2
             WHERE 
               vo.OpportunityID = $1;
 `;

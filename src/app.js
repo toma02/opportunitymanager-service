@@ -6,6 +6,7 @@ const opportunityRoutes = require('./routes/opportunityRoutes');
 const keywordRoutes = require('./routes/keywordRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const userFavoritesRoutes = require('./routes/userFavoritesRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const allowedOrigins = [
@@ -34,6 +35,7 @@ app.use('/opportunities', opportunityRoutes);
 app.use('/keywords', keywordRoutes);
 app.use('/attendance', attendanceRoutes);
 app.use('/comment', commentRoutes);
+app.use('/user-favorites', userFavoritesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use(errorHandler);
 
