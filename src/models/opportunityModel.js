@@ -1,22 +1,19 @@
 const pool = require('../db');
 
-const getUpcoming = async () => {
-  const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+const getUpcoming = async (currentUserId = null) => {
+  const today = new Date().toISOString().slice(0, 10);
   const filter = `vo.OpportunityDate > '${today}'`;
-  return getOpportunities(filter);
+  return getOpportunities(currentUserId, filter);
 };
 
-const getActiveNow = async () => {
-  const filter = `
-    vo.OpportunityDate <= NOW()
-    AND (vo.OpportunityDate + vo.duration * INTERVAL '1 minute') > NOW()
-  `;
-  return getOpportunities(filter);
+const getActiveNow = async (currentUserId = null) => {
+  const filter = `vo.OpportunityDate <= NOW() AND (vo.OpportunityDate + vo.duration * INTERVAL '1 minute') > NOW()`;
+  return getOpportunities(currentUserId, filter);
 };
 
-const getPast = async () => {
+const getPast = async (currentUserId = null) => {
   const filter = `(vo.OpportunityDate + vo.duration * INTERVAL '1 minute') < NOW()`;
-  return getOpportunities(filter);
+  return getOpportunities(currentUserId, filter);
 };
 
 const getOpportunities = async (currentUserId = null, filter = '') => {
@@ -27,7 +24,7 @@ const getOpportunities = async (currentUserId = null, filter = '') => {
   let userFavoriteSelect = 'FALSE AS is_favorited';
 
   if (currentUserId) {
-    userFavoriteJoin = `LEFT JOIN user_favorites uf ON vo.OpportunityID = uf.opportunityid AND uf.userid = $${sqlParams.length + 1}`;
+    userFavoriteJoin = `LEFT JOIN userfavorites uf ON vo.OpportunityID = uf.opportunityid AND uf.userid = $${sqlParams.length + 1}`;
     userFavoriteSelect = 'CASE WHEN uf.userid IS NOT NULL THEN TRUE ELSE FALSE END AS is_favorited';
     sqlParams.push(currentUserId);
   }
@@ -108,13 +105,16 @@ const getAll = async (currentUser) => {
 };
 
 
-const getApproved = async () => {
-  return getOpportunities('is_approved = TRUE');
+const getApproved = async (currentUserId = null) => {
+  const filter = `is_approved = TRUE`;
+  return getOpportunities(currentUserId, filter);
 };
 
-const getPending = async () => {
-  return getOpportunities('is_approved = FALSE');
+const getPending = async (currentUserId = null) => {
+  const filter = `is_approved = FALSE`;
+  return getOpportunities(currentUserId, filter);
 };
+
 
 const getById = async (eventId, userId) => {
   const sql = `

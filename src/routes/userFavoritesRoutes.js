@@ -10,4 +10,3 @@ router.delete('/:opportunityId', authenticateToken, userFavoritesController.remo
 router.get('/', authenticateToken, userFavoritesController.getUserFavorites);
 
 module.exports = router;
-
