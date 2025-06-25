@@ -54,3 +54,17 @@ exports.deleteAttendance = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getEventAttendees = async (req, res, next) => {
+  try {
+    const eventId = req.params.id;
+    if (!eventId) {
+      return res.status(400).json({ error: "ID događaja je obavezan", code: "MISSING_ID" });
+    }
+
+    const attendees = await attendanceModel.getAllForEvent(eventId);
+    res.json(attendees);
+  } catch (err) {
+    next(err);
+  }
+};

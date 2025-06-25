@@ -6,5 +6,6 @@ const authenticateToken = require('../utils/jwt');
 router.get('/:id/attendance', attendanceController.getUserEvents);
 router.post('/:id/attendance', authenticateToken, attendanceController.postAttendance);
 router.delete('/:id/attendance', authenticateToken, attendanceController.deleteAttendance);
+router.get('/:id/attendees', attendanceController.getEventAttendees);
 
 module.exports = router;

@@ -187,3 +187,36 @@ exports.getPastOpportunities = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.closeOpportunity = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userid; 
+
+    if (!id) {
+      return res.status(400).json({ error: "ID događaja je obavezan", code: "MISSING_ID" });
+    }
+
+    const opportunity = await opportunityModel.getById(id, userId);
+    if (!opportunity) {
+      return res.status(404).json({ error: "Događaj nije pronađen", code: "NOT_FOUND" });
+    }
+
+    if (opportunity.organizer.id !== userId) {
+      return res.status(403).json({ error: "Samo organizator/admin može zatvoriti događaj", code: "NOT_ORGANIZER" });
+    }
+
+    const closedOpportunity = await opportunityModel.closeOpportunity(id);
+    if (!closedOpportunity) {
+      return res.status(404).json({ error: "Događaj nije pronađen", code: "NOT_FOUND" });
+    }
+
+    res.json({
+      success: true,
+      message: "Događaj je službeno završen",
+      event: closedOpportunity
+    });
+  } catch (err) {
+    next(err);
+  }
+};

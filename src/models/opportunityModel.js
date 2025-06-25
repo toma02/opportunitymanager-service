@@ -86,6 +86,7 @@ const getOpportunities = async (currentUserId = null, filter = '') => {
       latitude, 
       longitude,
       is_approved,
+      is_closed,
       ${userFavoriteSelect}
     FROM VolunteerOpportunity vo
     JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
@@ -217,7 +218,8 @@ const getById = async (eventId, userId) => {
               equipmentrequired, 
               latitude, 
               longitude,
-              is_approved, 
+              is_approved,
+              is_closed,
               (
                 SELECT 
                   jsonb_agg(
@@ -489,6 +491,17 @@ const approve = async (eventId) => {
   return result.rows[0] || null;
 };
 
+const closeOpportunity = async (id) => {
+  const sql = `
+    UPDATE volunteeropportunity
+    SET is_closed = TRUE
+    WHERE opportunityid = $1
+    RETURNING *;
+  `;
+  const result = await pool.query(sql, [id]);
+  return result.rows[0] || null;
+};
+
 module.exports = {
   getAll,
   getById,
@@ -500,5 +513,6 @@ module.exports = {
   create,
   uploadOrUpdateEventImage,
   approve,
-  update
+  update,
+  closeOpportunity
 };

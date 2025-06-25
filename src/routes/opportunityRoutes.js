@@ -26,5 +26,6 @@ router.put('/pending/:id', authenticateToken, opportunityController.approveOppor
 router.get('/:id', opportunityController.getOpportunityById);
 router.put('/:id', authenticateToken, opportunityController.updateOpportunity);
 router.post('/', authenticateToken, upload.single('image'), opportunityController.postEvent);
+router.post('/:id/close', authenticateToken, opportunityController.closeOpportunity);
 
 module.exports = router;

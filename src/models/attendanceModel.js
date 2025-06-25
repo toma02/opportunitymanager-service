@@ -75,8 +75,29 @@ const removeAttendance = async (eventId, userId) => {
   await pool.query(deleteSql, [eventId, userId]);
 };
 
+const getAllForEvent = async (eventId) => {
+  const sql = `
+    SELECT 
+      u.userid AS id,
+      u.username AS name,
+      up.first_name,
+      up.last_name,
+      up.filename AS avatar,
+      a.attended,
+      a.created_at AS registration_date
+    FROM attendance a
+    JOIN "User" u ON a.userid = u.userid
+    LEFT JOIN userprofile up ON u.userid = up.userid
+    WHERE a.opportunityid = $1
+    ORDER BY a.created_at DESC;
+  `;
+  const result = await pool.query(sql, [eventId]);
+  return result.rows;
+};
+
 module.exports = {
   addAttendance,
   removeAttendance,
-  getAllForUser
+  getAllForUser,
+  getAllForEvent
 };
