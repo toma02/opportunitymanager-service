@@ -8,8 +8,8 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const userFavoritesRoutes = require('./routes/userFavoritesRoutes');
 const userStatisticsRoutes = require('./routes/userStatisticsRoutes');
+const nearbyPlacesRoutes = require('./routes/nearbyPlacesRoutes');
 const errorHandler = require('./middlewares/errorHandler');
-
 
 const allowedOrigins = [
   'http://172.20.10.4:8081',
@@ -39,6 +39,7 @@ app.use('/attendance', attendanceRoutes);
 app.use('/comment', commentRoutes);
 app.use('/user-favorites', userFavoritesRoutes);
 app.use('/statistics', userStatisticsRoutes);
+app.use('/nearby-places', nearbyPlacesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use(errorHandler);
 
