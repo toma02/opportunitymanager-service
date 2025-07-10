@@ -191,7 +191,7 @@ exports.getPastOpportunities = async (req, res, next) => {
 exports.closeOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userid; 
+    const userId = req.user.userid;
 
     if (!id) {
       return res.status(400).json({ error: "ID događaja je obavezan", code: "MISSING_ID" });
@@ -216,6 +216,37 @@ exports.closeOpportunity = async (req, res, next) => {
       message: "Događaj je službeno završen",
       event: closedOpportunity
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteOpportunity = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: "ID događaja je obavezan!" });
+    }
+
+    const deleted = await opportunityModel.deleteById(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Događaj nije pronađen ili je već obrisan!" });
+    }
+
+    res.json({ success: true, message: "Događaj je uspješno obrisan." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getMyClosedEvents = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: "User ID je obavezan!" });
+    }
+    const events = await opportunityModel.getClosedEventsByUser(id);
+    res.json(events);
   } catch (err) {
     next(err);
   }

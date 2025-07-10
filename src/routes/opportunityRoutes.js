@@ -27,5 +27,6 @@ router.get('/:id', opportunityController.getOpportunityById);
 router.put('/:id', authenticateToken, opportunityController.updateOpportunity);
 router.post('/', authenticateToken, upload.single('image'), opportunityController.postEvent);
 router.post('/:id/close', authenticateToken, opportunityController.closeOpportunity);
+router.delete('/:id', authenticateToken, opportunityController.deleteOpportunity);
 
 module.exports = router;

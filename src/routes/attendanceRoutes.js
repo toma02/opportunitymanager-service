@@ -7,5 +7,6 @@ router.get('/:id/attendance', attendanceController.getUserEvents);
 router.post('/:id/attendance', authenticateToken, attendanceController.postAttendance);
 router.delete('/:id/attendance', authenticateToken, attendanceController.deleteAttendance);
 router.get('/:id/attendees', attendanceController.getEventAttendees);
+router.get('/:id/my-closed', attendanceController.getUserClosedEvents);
 
 module.exports = router;

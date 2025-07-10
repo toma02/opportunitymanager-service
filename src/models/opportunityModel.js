@@ -306,8 +306,6 @@ const getById = async (eventId, userId) => {
 };
 
 const create = async (eventData) => {
-  // console.log(eventData);
-
   const {
     title,
     description,
@@ -502,6 +500,12 @@ const closeOpportunity = async (id) => {
   return result.rows[0] || null;
 };
 
+const deleteById = async (id) => {
+  const sql = 'DELETE FROM volunteeropportunity WHERE opportunityid = $1 RETURNING *';
+  const result = await pool.query(sql, [id]);
+  return result.rows[0] || null;
+};
+
 module.exports = {
   getAll,
   getById,
@@ -514,5 +518,6 @@ module.exports = {
   uploadOrUpdateEventImage,
   approve,
   update,
-  closeOpportunity
+  closeOpportunity,
+  deleteById
 };
