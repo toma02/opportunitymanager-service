@@ -1,4 +1,5 @@
 const commentModel = require('../models/commentModel');
+const Messages = require('../enums/messages.enum');
 
 exports.getAllCommentsById = async (req, res, next) => {
   try {
@@ -6,13 +7,13 @@ exports.getAllCommentsById = async (req, res, next) => {
     const currentUser = req.query.current_user;
 
     if (!id) {
-      return res.status(400).json({ error: "ID je obavezan parametar" });
+      return res.status(400).json({ error: Messages.ID_REQUIRED });
     }
 
     const comments = await commentModel.getAllById(id, currentUser);
 
     if (!comments) {
-      return res.status(404).json({ error: "Nema komentara za taj događaj!" });
+      return res.status(404).json({ error: Messages.NO_COMMENTS_FOR_EVENT });
     }
 
     res.json(comments);
@@ -25,7 +26,7 @@ exports.postNewComment = async (req, res, next) => {
   try {
     const { opportunityid, userid, comment } = req.body;
     if (!opportunityid || !userid || !comment) {
-      return res.status(400).json({ error: "Sva polja su obavezna!" });
+      return res.status(400).json({ error: Messages.ALL_FIELDS_REQUIRED });
     }
 
     const newComment = await commentModel.addComment({ opportunityid, userid, comment });
@@ -39,12 +40,12 @@ exports.deleteComment = async (req, res, next) => {
   try {
     const { commentId } = req.params;
     if (!commentId) {
-      return res.status(400).json({ error: "ID komentara je obavezan!" });
+      return res.status(400).json({ error: Messages.COMMENT_ID_REQUIRED });
     }
 
     const deletedComment = await commentModel.deleteComment(commentId);
     if (!deletedComment) {
-      return res.status(404).json({ error: "Komentar nije pronađen!" });
+      return res.status(404).json({ error: Messages.COMMENT_NOT_FOUND });
     }
 
     res.json({ success: true, deletedComment });
@@ -58,7 +59,7 @@ exports.likeComment = async (req, res, next) => {
     const { commentId } = req.params;
     const userId = req.user.userid;
     if (!commentId || !userId) {
-      return res.status(400).json({ error: "ID komentara i korisnika su obavezni!" });
+      return res.status(400).json({ error: Messages.COMMENT_ID_AND_USER_ID_REQUIRED });
     }
 
     const result = await commentModel.likeComment(commentId, userId);
@@ -73,7 +74,7 @@ exports.unlikeComment = async (req, res, next) => {
     const { commentId } = req.params;
     const userId = req.user.userid;
     if (!commentId || !userId) {
-      return res.status(400).json({ error: "ID komentara i korisnika su obavezni!" });
+      return res.status(400).json({ error: Messages.COMMENT_ID_AND_USER_ID_REQUIRED });
     }
 
     const result = await commentModel.unlikeComment(commentId, userId);
@@ -90,7 +91,7 @@ exports.reportComment = async (req, res, next) => {
     const { reason } = req.body;
 
     if (!commentId || !userId) {
-      return res.status(400).json({ error: "ID komentara i korisnika su obavezni!" });
+      return res.status(400).json({ error: Messages.COMMENT_ID_AND_USER_ID_REQUIRED });
     }
 
     const result = await commentModel.reportComment(commentId, userId, reason);
@@ -98,7 +99,7 @@ exports.reportComment = async (req, res, next) => {
     res.json({ success: true, report: result });
   } catch (err) {
     if (err.code === '23505') { 
-      return res.status(400).json({ error: "Već ste prijavili ovaj komentar." });
+      return res.status(400).json({ error: Messages.COMMENT_ALREADY_REPORTED });
     }
     next(err);
   }

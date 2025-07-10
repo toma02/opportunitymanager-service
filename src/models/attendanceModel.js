@@ -115,6 +115,7 @@ const getClosedForUser = async (userId) => {
         'role', u.role,
         'avatar', up.filename
       ) AS organizer,
+      (vo.UserIDOfOrganisator = $1) AS "isOrganizer",
       (SELECT FileName FROM EventImages WHERE OpportunityID = vo.OpportunityID LIMIT 1) AS image,
       (SELECT jsonb_agg(UserID) FROM Attendance WHERE OpportunityID = vo.OpportunityID AND Attended = true LIMIT 5) AS avatars,
       (SELECT jsonb_agg(jsonb_build_object('id', a.UserID, 'name', u2.UserName, 'avatar', up2.filename))

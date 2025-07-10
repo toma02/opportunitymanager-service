@@ -1,4 +1,5 @@
 const opportunityModel = require('../models/opportunityModel');
+const Messages = require('../enums/messages.enum');
 
 exports.getAllOpportunities = async (req, res, next) => {
   try {
@@ -42,14 +43,14 @@ exports.getOpportunityById = async (req, res, next) => {
   try {
     const id = req.params.id;
     if (!id) {
-      return res.status(400).json({ error: "ID je obavezan parametar" });
+      return res.status(400).json({ error: Messages.ID_REQUIRED });
     }
 
     const currentUser = req.query.current_user;
     const opportunity = await opportunityModel.getById(id, currentUser);
 
     if (!opportunity) {
-      return res.status(404).json({ error: "Događaj nije pronađen" });
+      return res.status(404).json({ error: Messages.EVENT_NOT_FOUND });
     }
 
     res.json(opportunity);
@@ -83,7 +84,7 @@ exports.postEvent = async (req, res, next) => {
     } = req.body;
 
     if (!title || !startDate || !location || !userId) {
-      return res.status(400).json({ error: "Obavezna polja su naslov, datum, lokacija i organizator" });
+      return res.status(400).json({ error: Messages.REQUIRED_FIELDS_MISSING });
     }
 
     const newEvent = await opportunityModel.create({
@@ -126,13 +127,13 @@ exports.updateOpportunity = async (req, res, next) => {
     const eventData = req.body;
 
     if (!id) {
-      return res.status(400).json({ error: "ID događaja je obavezan!" });
+      return res.status(400).json({ error: Messages.EVENT_ID_REQUIRED });
     }
 
     const updatedEvent = await opportunityModel.update(id, eventData);
 
     if (!updatedEvent) {
-      return res.status(404).json({ error: "Događaj nije pronađen!" });
+      return res.status(404).json({ error: Messages.EVENT_NOT_FOUND });
     }
 
     res.json({ success: true, event: updatedEvent });
@@ -148,7 +149,7 @@ exports.approveOpportunity = async (req, res, next) => {
     const approvedEvent = await opportunityModel.approve(id);
 
     if (!approvedEvent) {
-      return res.status(404).json({ error: "Događaj nije pronađen" });
+      return res.status(404).json({ error: Messages.EVENT_NOT_FOUND });
     }
 
     res.json({
@@ -194,28 +195,24 @@ exports.closeOpportunity = async (req, res, next) => {
     const userId = req.user.userid;
 
     if (!id) {
-      return res.status(400).json({ error: "ID događaja je obavezan", code: "MISSING_ID" });
+      return res.status(400).json({ error: Messages.EVENT_ID_REQUIRED, code: "MISSING_ID" });
     }
 
     const opportunity = await opportunityModel.getById(id, userId);
     if (!opportunity) {
-      return res.status(404).json({ error: "Događaj nije pronađen", code: "NOT_FOUND" });
+      return res.status(404).json({ error: Messages.EVENT_NOT_FOUND, code: "NOT_FOUND" });
     }
 
     if (opportunity.organizer.id !== userId) {
-      return res.status(403).json({ error: "Samo organizator/admin može zatvoriti događaj", code: "NOT_ORGANIZER" });
+      return res.status(403).json({ error: Messages.ONLY_ORGANIZER_OR_ADMIN_CAN_CLOSE, code: "NOT_ORGANIZER" });
     }
 
     const closedOpportunity = await opportunityModel.closeOpportunity(id);
     if (!closedOpportunity) {
-      return res.status(404).json({ error: "Događaj nije pronađen", code: "NOT_FOUND" });
+      return res.status(404).json({ error: Messages.EVENT_NOT_FOUND, code: "NOT_FOUND" });
     }
 
-    res.json({
-      success: true,
-      message: "Događaj je službeno završen",
-      event: closedOpportunity
-    });
+    res.json({ success: true, message: Messages.EVENT_CLOSED, event: closedOpportunity });
   } catch (err) {
     next(err);
   }
@@ -225,15 +222,15 @@ exports.deleteOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ error: "ID događaja je obavezan!" });
+      return res.status(400).json({ error: Messages.EVENT_ID_REQUIRED });
     }
 
     const deleted = await opportunityModel.deleteById(id);
     if (!deleted) {
-      return res.status(404).json({ error: "Događaj nije pronađen ili je već obrisan!" });
+      return res.status(404).json({ error: Messages.EVENT_NOT_FOUND_OR_ALREADY_DELETED });
     }
 
-    res.json({ success: true, message: "Događaj je uspješno obrisan." });
+    res.json({ success: true, message: Messages.EVENT_DELETED });
   } catch (err) {
     next(err);
   }
@@ -243,7 +240,7 @@ exports.getMyClosedEvents = async (req, res, next) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ error: "User ID je obavezan!" });
+      return res.status(400).json({ error: Messages.USER_ID_REQUIRED });
     }
     const events = await opportunityModel.getClosedEventsByUser(id);
     res.json(events);

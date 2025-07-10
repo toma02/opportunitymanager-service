@@ -1,16 +1,16 @@
+const Messages = require('../enums/messages.enum');
 const userFavoritesModel = require('../models/userFavoritesModel');
-const authenticateToken = require('../utils/jwt');
 
 exports.addToFavorites = async (req, res, next) => {
   try {
     const userId = req.user.userid;
     const { opportunityId } = req.body;
     if (!opportunityId) {
-      return res.status(400).json({ error: "ID događaja je obavezan." });
+      return res.status(400).json({ error: Messages.EVENT_ID_REQUIRED });
     }
     const favorite = await userFavoritesModel.addToFavorites(userId, opportunityId);
     if (!favorite) {
-      return res.status(200).json({ success: true, message: "Događaj već u favoritima." });
+      return res.status(200).json({ success: true, message: Messages.ALREADY_IN_FAVORITES });
     }
     res.json({ success: true, favorite });
   } catch (err) {
@@ -23,13 +23,13 @@ exports.removeFromFavorites = async (req, res, next) => {
     const userId = req.user.userid;
     const { opportunityId } = req.params;
     if (!opportunityId) {
-      return res.status(400).json({ error: "ID događaja je obavezan." });
+      return res.status(400).json({ error: Messages.EVENT_ID_REQUIRED });
     }
     const removed = await userFavoritesModel.removeFromFavorites(userId, opportunityId);
     if (!removed) {
-      return res.status(404).json({ error: "Događaj nije pronađen u favoritima." });
+      return res.status(404).json({ error: Messages.NOT_FOUND_IN_FAVORITES });
     }
-    res.json({ success: true, message: "Događaj uklonjen iz favorita." });
+    res.json({ success: true, message: Messages.REMOVED_FROM_FAVORITES  });
   } catch (err) {
     next(err);
   }
