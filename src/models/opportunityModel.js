@@ -324,7 +324,11 @@ const create = async (eventData) => {
     shareToSocialMedia,
     isPrivate,
     userId,
-    is_approved
+    is_approved,
+    county,
+    city,
+    country,
+    place_id
   } = eventData;
 
   let keywords = eventData.keywords;
@@ -352,8 +356,12 @@ const create = async (eventData) => {
         useridoforganisator,
         latitude,
         longitude,
-        is_approved
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+        is_approved,
+        county,
+        city,
+        country,
+        place_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
       RETURNING opportunityid
     `;
 
@@ -391,7 +399,11 @@ const create = async (eventData) => {
       userId,
       latitude,
       longitude,
-      is_approved
+      is_approved,
+      county,
+      city,
+      country,
+      place_id
     ];
 
     const result = await client.query(sql, values);
