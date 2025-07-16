@@ -87,6 +87,10 @@ const getOpportunities = async (currentUserId = null, filter = '') => {
       longitude,
       is_approved,
       is_closed,
+      county,
+      city,
+      country,
+      place_id,
       ${userFavoriteSelect}
     FROM VolunteerOpportunity vo
     JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
@@ -220,6 +224,10 @@ const getById = async (eventId, userId) => {
               longitude,
               is_approved,
               is_closed,
+              county,
+              city,
+              country,
+              place_id,
               (
                 SELECT 
                   jsonb_agg(
@@ -518,6 +526,18 @@ const deleteById = async (id) => {
   return result.rows[0] || null;
 };
 
+const getAllCounties = async () => {
+  
+  const sql = `
+    SELECT DISTINCT county
+    FROM volunteeropportunity
+    WHERE county IS NOT NULL AND TRIM(county) <> ''
+    ORDER BY county;
+  `;
+  const result = await pool.query(sql);
+  return result.rows.map(row => row.county);
+};
+
 module.exports = {
   getAll,
   getById,
@@ -531,5 +551,6 @@ module.exports = {
   approve,
   update,
   closeOpportunity,
-  deleteById
+  deleteById,
+  getAllCounties
 };

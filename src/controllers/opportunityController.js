@@ -256,3 +256,12 @@ exports.getMyClosedEvents = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getAllCounties = async (req, res, next) => {
+  try {
+    const counties = await opportunityModel.getAllCounties();
+    res.json(counties);
+  } catch (err) {
+    next(err);
+  }
+};

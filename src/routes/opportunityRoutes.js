@@ -23,6 +23,7 @@ router.get('/approved', opportunityController.getApprovedOpportunities);
 router.get('/past', opportunityController.getPastOpportunities);
 router.get('/pending', opportunityController.getPendingOpportunities);
 router.put('/pending/:id', authenticateToken, opportunityController.approveOpportunity);
+router.get('/counties', opportunityController.getAllCounties);
 router.get('/:id', opportunityController.getOpportunityById);
 router.put('/:id', authenticateToken, opportunityController.updateOpportunity);
 router.post('/', authenticateToken, upload.single('image'), opportunityController.postEvent);
