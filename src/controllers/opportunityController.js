@@ -1,5 +1,8 @@
 const opportunityModel = require('../models/opportunityModel');
 const Messages = require('../enums/messages.enum');
+const path = require('path');
+const fs = require('fs');
+const { getEventImageFilename, isImageUsedByOtherEvents } = opportunityModel;
 
 exports.getAllOpportunities = async (req, res, next) => {
   try {
@@ -91,7 +94,80 @@ exports.postEvent = async (req, res, next) => {
       return res.status(400).json({ error: Messages.REQUIRED_FIELDS_MISSING });
     }
 
-    const newEvent = await opportunityModel.create({
+    const createdEvents = [];
+
+    const freqMap = {
+      '2': 'day',
+      '3': 'week',
+      '4': 'month',
+      '5': 'year'
+    };
+
+    const freqUnit = freqMap[frequencyId];
+    const totalRepeats = parseInt(frequencyVolume) || 1;
+
+    if (frequencyId !== '1' && freqUnit) {
+      const initialStart = new Date(startDate);
+      const initialEnd = new Date(endDate);
+
+      for (let i = 0; i < totalRepeats; i++) {
+        const startDateOffset = new Date(initialStart);
+        const endDateOffset = new Date(initialEnd);
+
+        switch (freqUnit) {
+          case 'day':
+            startDateOffset.setDate(initialStart.getDate() + i);
+            endDateOffset.setDate(initialEnd.getDate() + i);
+            break;
+          case 'week':
+            startDateOffset.setDate(initialStart.getDate() + 7 * i);
+            endDateOffset.setDate(initialEnd.getDate() + 7 * i);
+            break;
+          case 'month':
+            startDateOffset.setMonth(initialStart.getMonth() + i);
+            endDateOffset.setMonth(initialEnd.getMonth() + i);
+            break;
+          case 'year':
+            startDateOffset.setFullYear(initialStart.getFullYear() + i);
+            endDateOffset.setFullYear(initialEnd.getFullYear() + i);
+            break;
+        }
+
+        const event = await opportunityModel.create({
+          title,
+          description,
+          keywords,
+          startDate: startDateOffset.toISOString(),
+          endDate: endDateOffset.toISOString(),
+          frequencyId,
+          frequencyVolume,
+          location,
+          latitude,
+          longitude,
+          transport,
+          minVolunteers,
+          maxVolunteers,
+          duration,
+          equipment,
+          shareToSocialMedia,
+          isPrivate,
+          userId,
+          is_approved,
+          county,
+          city,
+          country,
+          place_id
+        });
+
+        await opportunityModel.uploadOrUpdateEventImage(event.opportunityid, req.file.filename);
+
+        createdEvents.push(event);
+      }
+
+      return res.status(201).json({ message: 'Višestruki događaji kreirani', events: createdEvents });
+    }
+
+    const singleEvent = await opportunityModel.create({
       title,
       description,
       keywords,
@@ -117,13 +193,11 @@ exports.postEvent = async (req, res, next) => {
       place_id
     });
 
-    const eventId = newEvent.opportunityid;
-
     if (req.file) {
-      await opportunityModel.uploadOrUpdateEventImage(eventId, req.file.filename);
+      await opportunityModel.uploadOrUpdateEventImage(singleEvent.opportunityid, req.file.filename);
     }
 
-    res.status(201).json(newEvent);
+    res.status(201).json(singleEvent);
   } catch (err) {
     next(err);
   }
@@ -229,13 +303,28 @@ exports.closeOpportunity = async (req, res, next) => {
 exports.deleteOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
+
     if (!id) {
       return res.status(400).json({ error: Messages.EVENT_ID_REQUIRED });
     }
 
+    const filename = await getEventImageFilename(id);
     const deleted = await opportunityModel.deleteById(id);
+
     if (!deleted) {
       return res.status(404).json({ error: Messages.EVENT_NOT_FOUND_OR_ALREADY_DELETED });
+    }
+
+    if (filename) {
+      const isUsed = await isImageUsedByOtherEvents(filename, id);
+      if (!isUsed) {
+        const fullPath = path.join(__dirname, '..', '..', 'uploads', 'events', filename);
+        try {
+          await fs.promises.unlink(fullPath);
+        } catch (err) {
+          console.error(`Greška pri brisanju slike ${filename}:`, err.message);
+        }
+      }
     }
 
     res.json({ success: true, message: Messages.EVENT_DELETED });
@@ -243,6 +332,7 @@ exports.deleteOpportunity = async (req, res, next) => {
     next(err);
   }
 };
+
 
 exports.getMyClosedEvents = async (req, res, next) => {
   try {

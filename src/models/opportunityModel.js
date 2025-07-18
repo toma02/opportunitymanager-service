@@ -498,6 +498,26 @@ const uploadOrUpdateEventImage = async (eventId, filename) => {
   return result.rows[0];
 };
 
+const getEventImageFilename = async (eventId) => {
+  const sql = `
+    SELECT filename 
+    FROM eventimages 
+    WHERE opportunityid = $1
+  `;
+  const result = await pool.query(sql, [eventId]);
+  return result.rows[0]?.filename || null;
+};
+
+const isImageUsedByOtherEvents = async (filename, eventId) => {
+  const sql = `
+    SELECT COUNT(*) 
+    FROM eventimages 
+    WHERE filename = $1 AND opportunityid <> $2
+  `;
+  const result = await pool.query(sql, [filename, eventId]);
+  return parseInt(result.rows[0].count) > 0;
+};
+
 const approve = async (eventId) => {
   const sql = `
     UPDATE volunteeropportunity 
@@ -548,6 +568,8 @@ module.exports = {
   getPast,
   create,
   uploadOrUpdateEventImage,
+  getEventImageFilename,
+  isImageUsedByOtherEvents,
   approve,
   update,
   closeOpportunity,
