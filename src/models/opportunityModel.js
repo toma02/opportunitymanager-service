@@ -91,6 +91,18 @@ const getOpportunities = async (currentUserId = null, filter = '') => {
       city,
       country,
       place_id,
+      (
+        SELECT json_agg(k.Name)
+        FROM EventKeyword ek
+        JOIN Keyword k ON ek.KeywordID = k.KeywordID
+        WHERE ek.EventID = vo.OpportunityID
+      ) AS keywords,
+      (
+        SELECT json_agg(s.name)
+        FROM opportunity_skill os
+        JOIN skill s ON os.skillid = s.skillid
+        WHERE os.opportunityid = vo.opportunityid
+      ) AS skills,
       ${userFavoriteSelect}
     FROM VolunteerOpportunity vo
     JOIN "User" u ON vo.UserIDOfOrganisator = u.UserId
@@ -179,7 +191,13 @@ const getById = async (eventId, userId) => {
                   JOIN Keyword k ON ek.KeywordID = k.KeywordID 
                 WHERE 
                   ek.EventID = vo.OpportunityID
-              ) AS keywords, 
+              ) AS keywords,
+              (
+                SELECT json_agg(s.name)
+                FROM opportunity_skill os
+                JOIN skill s ON os.skillid = s.skillid
+                WHERE os.opportunityid = vo.opportunityid
+              ) AS skills,
               EXISTS(
                 SELECT 
                   1 
@@ -340,6 +358,7 @@ const create = async (eventData) => {
   } = eventData;
 
   let keywords = eventData.keywords;
+  let skills = eventData.skills;
 
   const client = await pool.connect();
   try {
@@ -420,7 +439,6 @@ const create = async (eventData) => {
     if (typeof keywords === 'string') {
       keywords = JSON.parse(keywords);
     }
-
     if (Array.isArray(keywords) && keywords.length > 0) {
       const keywordSql = `
         INSERT INTO eventkeyword (eventid, keywordid)
@@ -428,6 +446,20 @@ const create = async (eventData) => {
       `;
       for (const keywordId of keywords) {
         await client.query(keywordSql, [eventId, keywordId]);
+      }
+    }
+
+    if (typeof skills === 'string') {
+      skills = JSON.parse(skills);
+    }
+
+    if (Array.isArray(skills) && skills.length > 0) {
+      const skillSql = `
+        INSERT INTO opportunity_skill (opportunityid, skillid)
+        VALUES ($1, $2)
+      `;
+      for (const skillId of skills) {
+        await client.query(skillSql, [eventId, skillId]);
       }
     }
 
@@ -547,7 +579,7 @@ const deleteById = async (id) => {
 };
 
 const getAllCounties = async () => {
-  
+
   const sql = `
     SELECT DISTINCT county
     FROM volunteeropportunity

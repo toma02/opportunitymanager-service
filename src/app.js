@@ -10,6 +10,7 @@ const userFavoritesRoutes = require('./routes/userFavoritesRoutes');
 const userStatisticsRoutes = require('./routes/userStatisticsRoutes');
 const nearbyPlacesRoutes = require('./routes/nearbyPlacesRoutes');
 const reportsRoutes = require('./routes/reportsRoutes');
+const skillRoutes = require('./routes/skillRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const allowedOrigins = [
@@ -42,6 +43,7 @@ app.use('/user-favorites', userFavoritesRoutes);
 app.use('/statistics', userStatisticsRoutes);
 app.use('/nearby-places', nearbyPlacesRoutes);
 app.use('/app-reports', reportsRoutes);
+app.use('/skill', skillRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use(errorHandler);
 

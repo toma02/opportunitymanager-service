@@ -87,7 +87,8 @@ exports.postEvent = async (req, res, next) => {
       county,
       city,
       country,
-      place_id
+      place_id,
+      skills
     } = req.body;
 
     if (!title || !startDate || !location || !userId) {
@@ -156,7 +157,8 @@ exports.postEvent = async (req, res, next) => {
           county,
           city,
           country,
-          place_id
+          place_id,
+          skills
         });
 
         await opportunityModel.uploadOrUpdateEventImage(event.opportunityid, req.file.filename);
@@ -190,7 +192,8 @@ exports.postEvent = async (req, res, next) => {
       county,
       city,
       country,
-      place_id
+      place_id,
+      skills
     });
 
     if (req.file) {
