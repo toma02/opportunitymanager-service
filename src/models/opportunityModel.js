@@ -6,6 +6,15 @@ const getUpcoming = async (currentUserId = null) => {
   return getOpportunities(currentUserId, filter);
 };
 
+const getByOrganizer = async (organizerId, currentUserId = null) => {
+  const idNum = parseInt(organizerId, 10);
+  if (Number.isNaN(idNum)) {
+    throw new Error('Invalid user id');
+  }
+  const filter = `vo.UserIDOfOrganisator = ${idNum}`;
+  return getOpportunities(currentUserId, filter);
+};
+
 const getActiveNow = async (currentUserId = null) => {
   const filter = `vo.OpportunityDate <= NOW() AND (vo.OpportunityDate + vo.duration * INTERVAL '1 minute') > NOW()`;
   return getOpportunities(currentUserId, filter);
@@ -82,7 +91,8 @@ const getOpportunities = async (currentUserId = null, filter = '') => {
         WHERE c.opportunityid = vo.OpportunityID
       ) AS commentsCount,
       ridetothedestination, 
-      equipmentrequired, 
+      equipmentrequired,
+      cansharetosocialmedia,
       latitude, 
       longitude,
       is_approved,
@@ -237,7 +247,8 @@ const getById = async (eventId, userId) => {
                   c.opportunityid = vo.OpportunityID
               ) AS commentsCount, 
               ridetothedestination, 
-              equipmentrequired, 
+              equipmentrequired,
+              cansharetosocialmedia, 
               latitude, 
               longitude,
               is_approved,
@@ -606,5 +617,6 @@ module.exports = {
   update,
   closeOpportunity,
   deleteById,
-  getAllCounties
+  getAllCounties,
+  getByOrganizer
 };

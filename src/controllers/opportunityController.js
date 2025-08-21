@@ -14,6 +14,22 @@ exports.getAllOpportunities = async (req, res, next) => {
   }
 };
 
+exports.getCreatedByUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: Messages.USER_ID_REQUIRED });
+    }
+
+    const currentUser = req.query.current_user || null;
+
+    const events = await opportunityModel.getByOrganizer(id, currentUser);
+    res.json(events);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getApprovedOpportunities = async (req, res, next) => {
   try {
     const opportunities = await opportunityModel.getApproved();

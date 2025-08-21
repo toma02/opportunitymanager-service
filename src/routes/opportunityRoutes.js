@@ -21,6 +21,7 @@ router.get('/upcoming', opportunityController.getUpcomingOpportunities);
 router.get('/active', opportunityController.getActiveOpportunities);
 router.get('/approved', opportunityController.getApprovedOpportunities);
 router.get('/past', opportunityController.getPastOpportunities);
+router.get('/created/by/:id', opportunityController.getCreatedByUser);
 router.get('/pending', opportunityController.getPendingOpportunities);
 router.put('/pending/:id', authenticateToken, opportunityController.approveOpportunity);
 router.get('/counties', opportunityController.getAllCounties);
