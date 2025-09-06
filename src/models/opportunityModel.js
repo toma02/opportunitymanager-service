@@ -59,6 +59,7 @@ const getOpportunities = async (currentUserId = null, filter = '') => {
         'name', u.UserName, 
         'role', u.role,
         'avatar', up.filename,
+        'phone', up.about_me,
         'recently_active', (NOW() - u.lastlogin <= interval '1 hour')
       ) AS organizer, 
       (
@@ -166,7 +167,7 @@ const getById = async (eventId, userId) => {
               NOT vo.isprivateevent AS is_public,
               json_build_object(
                 'id', u.userid,'name', u.UserName, 'role', u.role, 
-                'avatar', up.filename, 'recently_active', (NOW() - u.lastlogin <= interval '1 hour')
+                'avatar', up.filename, 'phone', up.about_me, 'recently_active', (NOW() - u.lastlogin <= interval '1 hour')
               ) AS organizer, 
               (
                 SELECT 

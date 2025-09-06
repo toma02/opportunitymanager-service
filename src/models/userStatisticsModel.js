@@ -3,7 +3,6 @@ const pool = require('../db');
 const getBasicStatistics = async () => {
   const sql = `
     SELECT json_build_object(
-      -- Osnovne statistike
       'basic', json_build_object(
         'total_events', (SELECT COUNT(*) FROM volunteeropportunity),
         'upcoming_events', (SELECT COUNT(*) FROM volunteeropportunity WHERE opportunitydate > NOW()),
